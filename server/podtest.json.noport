@@ -1,0 +1,9 @@
+{
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+        "annotations": {
+            "appmesh.amazon.com/virtualNode": "foo"
+        }
+    }
+}

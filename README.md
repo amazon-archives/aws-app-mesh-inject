@@ -1,7 +1,163 @@
-## AWS App Mesh Inject
+# AppMesh Inject
 
-AWS AppMesh sidecar injector for EKS.
+The AWS AppMesh Kubernetes sidecar injecting Admission Controller.
 
-## License
 
-This library is licensed under the Apache 2.0 License. 
+## Running
+To run this sidecar injector or the demo you need both the [aws cli](https://aws.amazon.com/cli/)
+ and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+
+To deploy the sidecar injector you must have your aws cli configured with the region you will be working in.
+
+To verify please run and verify you are configured for the correct region
+```
+$ aws configure get region
+```
+Export the name of your new mesh
+```
+$ export MESH=my_mesh_name
+```
+Now you can deploy the appmesh injector
+
+```bash
+$ make deployk8s
+```
+
+This will bootstrap the required certificates and start the sidecar injector in
+your cluster.
+
+To cleanup you can run
+```
+$ make clean
+```
+
+### Annotations
+ 
+
+To add and configure sidecars automatically in your pods you will need
+to add an annotation to your pod declaring the ports that will be managed by
+AppMesh, and the name of the AppMesh VirtualNode.
+
+
+```yaml
+
+    metadata:
+      labels:
+        name: my-app
+      annotations:
+        appmesh.amazon.com/ports: "8079"
+        appmesh.amazon.com/virtualNode: my-app
+
+```
+
+## Running the Demo
+
+You can run the demo app by running
+```
+$ make k8sdemo
+```
+
+The sidecar injector should have injected sidecars into the deployments, so you should see something like this
+Pods may be initing which means injection worked
+```
+$ kubectl get pods -n appmesh-demo
+appmesh-demo     blue-866f865cc7-gbb7z             0/2       Init:0/1   0          3s
+appmesh-demo     color-green-6b9db9948-lbbbn       0/2       Init:0/1   0          3s
+appmesh-demo     color-orange-f78bfd8ff-snf5q      0/2       Init:0/1   0          3s
+appmesh-demo     front-end-54f69dfd7b-zjgss        0/2       Init:0/1   0          4s
+```
+or init completed
+```
+$ kubectl get pods -n appmesh-demo
+NAME                           READY     STATUS    RESTARTS   AGE
+blue-866f865cc7-tkfkv          2/2       Running   0          5s
+color-green-6b9db9948-c4qx8    2/2       Running   0          5s
+color-orange-f78bfd8ff-chh56   2/2       Running   0          5s
+front-end-54f69dfd7b-7qtbh     2/2       Running   0          5s
+```
+
+To view the demo webpage run
+```
+$ kubectl port-forward -n appmesh-demo svc/front-end 8000:80
+```
+and visit http://localhost:8000/
+
+You should see a lot of red requests
+
+![demo screenshot1](https://raw.githubusercontent.com/awslabs/aws-app-mesh-inject/master/img/screenshot1.png)
+
+The mesh need to be made aware of your pods and how to route them, so you need to run
+
+```
+$ make appmeshdemo
+```
+
+After a few minutes the demo front-end should switch from all red to around 50% green and 50% blue.
+
+![demo screenshot2](https://raw.githubusercontent.com/awslabs/aws-app-mesh-inject/master/img/screenshot2.png)
+
+This routing is based on demo/appmesh/colors.r.json
+```
+$ cat demo/appmesh/colors.r.json
+{
+    "routeName": "colors-route",
+    "spec": {
+        "httpRoute": {
+            "action": {
+                "weightedTargets": [
+                    {
+                        "virtualNode": "orange",
+                        "weight": 0
+                    },
+                    {
+                        "virtualNode": "blue",
+                        "weight": 5
+                    },
+                    {
+                        "virtualNode": "green",
+                        "weight": 5
+                    }
+                ]
+            },
+            "match": {
+                "prefix": "/"
+            }
+        }
+    },
+    "virtualRouterName": "colors"
+}
+```
+
+You can adjust the weights in this file and then run
+```
+$ make updatecolors
+```
+
+And you should see the traffic distributed evenly across the values you set in the router.
+
+You can clean up the entire demo by running
+```
+$ make cleandemo
+```
+
+
+## Running Outside of AWS
+
+The AppMesh containers and the AppMesh Inject Admission Controller are hosted
+on ECR, but are publically available.  To pull the containers outside of AWS
+requires that Kubernetes contain ImagePullSecrets.
+The follow steps requores the awscli.
+For testing purposes you can add ImagePullSecrets by running:
+
+```
+$ make ecrsecrets
+```
+
+Then you will need to inject the pull secrets for the sidecars, for each
+namespace that will run the AppMesh sidecars.
+
+```
+$ NAMESPACE=my-namespace; make nssecrets
+```
+
+Replacing "my-namespace" with the namespace you want to add pull secrets to.

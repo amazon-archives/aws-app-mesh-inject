@@ -1,0 +1,17 @@
+language: go
+go: 1.10.x
+sudo: true
+services:
+- docker
+install: true
+notifications:
+  email: false
+env:
+  - TEST_SUITE=goveralls
+  - TEST_SUITE=buildpushhash
+before_install:
+  - go get github.com/mattn/goveralls
+script: 
+  - "make $TEST_SUITE"
+after_success:
+  - test -n "$TRAVIS_TAG" && make build && make push 

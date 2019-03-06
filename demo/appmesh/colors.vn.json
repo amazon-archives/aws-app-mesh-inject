@@ -1,0 +1,18 @@
+{
+    "spec": {
+        "listeners": [
+            {
+                "portMapping": {
+                    "port": 80,
+                    "protocol": "http"
+                }
+            }
+        ],
+        "serviceDiscovery": {
+            "dns": {
+                "serviceName": "colors"
+            }
+        }
+    },
+    "virtualNodeName": "colors"
+}

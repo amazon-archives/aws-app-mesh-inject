@@ -1,5 +1,34 @@
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aws-app-mesh-inject-sa
+  namespace: aws-app-mesh-inject
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: aws-app-mesh-inject-cr
+rules:
+  - apiGroups: ["*"]
+    resources: ["replicasets"]
+    verbs: ["get"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: aws-app-mesh-inject-binding
+subjects:
+  - kind: ServiceAccount
+    name: aws-app-mesh-inject-sa
+    namespace: aws-app-mesh-inject
+    apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: aws-app-mesh-inject-cr
+  apiGroup: ""
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: aws-app-mesh-inject
@@ -29,6 +58,7 @@ spec:
       labels:
         name: aws-app-mesh-inject
     spec:
+      serviceAccountName: aws-app-mesh-inject-sa
       containers:
         - name: webhook
           image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/aws-app-mesh-inject:${TAG}
@@ -90,3 +120,6 @@ webhooks:
         apiVersions: ["v1"]
         resources: ["pods"]
     failurePolicy: Ignore
+    namespaceSelector:
+      matchLabels:
+        appmesh.k8s.aws/sidecarInjectorWebhook: enabled

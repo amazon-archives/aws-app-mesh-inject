@@ -50,7 +50,13 @@ const (
 		{
 		  "runAsUser": 1337
 		},
-	      
+	      "ports": [
+		{
+		  "containerPort": 9901,
+		  "name": "stats",
+		  "protocol": "TCP"
+		}
+	      ],
 	      "env": [
 		{
 		  "name": "APPMESH_VIRTUAL_NODE_NAME",

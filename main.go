@@ -22,7 +22,7 @@ import (
 	"os"
 	"os/signal"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/awslabs/aws-app-mesh-inject/config"
 	"github.com/awslabs/aws-app-mesh-inject/server"
 )

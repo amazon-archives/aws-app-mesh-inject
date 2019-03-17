@@ -64,6 +64,9 @@ k8sdemo:
 	kubectl apply -f demo/front-end.yaml
 	kubectl apply -f demo/colors.yaml
 
+cleank8sdemo:
+	kubectl delete -f demo/ns.yaml
+
 appmeshdemo:
 	$(eval export MESH)
 	$(eval export REGION)

@@ -6,18 +6,22 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/awslabs/aws-app-mesh-inject/config"
 	"github.com/awslabs/aws-app-mesh-inject/patch"
+	"io/ioutil"
 	"k8s.io/api/admission/v1beta1"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/kubernetes/pkg/apis/apps"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
 func init() {
@@ -28,17 +32,21 @@ func init() {
 }
 
 var (
-	scheme               = runtime.NewScheme()
-	codecs               = serializer.NewCodecFactory(scheme)
-	tlscert, tlskey      string
-	healthResponse       = []byte("200 - Healthy")
-	wrongContentResponse = []byte("415 - Wrong Content Type")
-	ErrNoUID             = errors.New("No UID from request")
-	ErrNoPorts           = errors.New("No ports specified for injection, doing nothing")
-	ErrNoName            = errors.New("No VirtualNode name specified for injection, doing nothing")
-	ErrNoObject          = errors.New("No Object passed to mutate")
-	portAnnotation       = "appmesh.amazon.com/ports"
-	nameAnnotation       = "appmesh.amazon.com/virtualNode"
+	scheme               	  = runtime.NewScheme()
+	codecs                    = serializer.NewCodecFactory(scheme)
+	tlscert, tlskey           string
+	healthResponse            = []byte("200 - Healthy")
+	wrongContentResponse      = []byte("415 - Wrong Content Type")
+	ErrNoUID                  = errors.New("No UID from request")
+	ErrNoPorts                = errors.New("No ports specified for injection, doing nothing")
+	ErrNoName                 = errors.New("No VirtualNode name specified for injection, doing nothing")
+	ErrNoObject               = errors.New("No Object passed to mutate")
+	portsAnnotation           = "appmesh.k8s.aws/ports"
+	virtualNodeNameAnnotation = "appmesh.k8s.aws/virtualNode"
+	sidecarInjectAnnotation   = "appmesh.k8s.aws/sidecarInjectorWebhook"
+
+	kubeconfig, _ = rest.InClusterConfig()
+	clientset, _ = kubernetes.NewForConfig(kubeconfig)
 )
 
 func admissionResponseError(err error) *v1beta1.AdmissionResponse {
@@ -83,9 +91,6 @@ func (ah AppMeshHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 		admissionResponse = admissionResponseError(err)
 
-	} else if err = Decode(body, &receivedAdmissionReview); err != nil {
-		log.Error(err)
-		admissionResponse = admissionResponseError(err)
 	} else if err = validateRequest(receivedAdmissionReview); err != nil {
 		log.Error(err)
 		admissionResponse = admissionResponseError(err)
@@ -121,25 +126,45 @@ func (ah AppMeshHandler) mutate(receivedAdmissionReview v1beta1.AdmissionReview)
 	admissionResponse := v1beta1.AdmissionResponse{}
 	raw := receivedAdmissionReview.Request.Object.Raw
 	pod := corev1.Pod{}
-	deserializer := codecs.UniversalDeserializer()
 	var ports string
 	var name string
+
 	admissionResponse.Allowed = true
-	if _, _, err := deserializer.Decode(raw, nil, &pod); err != nil {
+	if err := json.Unmarshal(raw, &pod); err != nil {
 		log.Error(err)
 		return admissionResponseError(err)
 	}
-	if v, ok := pod.ObjectMeta.Annotations[portAnnotation]; ok {
-		ports = v
-	} else {
-		log.Info(ErrNoPorts)
+
+	// If sidecar injection is disabled in the annotation, we skip mutating
+	switch strings.ToLower(pod.ObjectMeta.Annotations[sidecarInjectAnnotation]) {
+	case "disabled":
+		log.Info("sidecar inject is disabled. Skipping mutating")
 		return &admissionResponse
 	}
-	if v, ok := pod.ObjectMeta.Annotations[nameAnnotation]; ok {
+
+	if v, ok := pod.ObjectMeta.Annotations[portsAnnotation]; ok {
+		ports = v
+	} else {
+		// if ports isn't specified in the pod annotation, use the container ports from the pod spec.
+		// https://github.com/awslabs/aws-app-mesh-inject/issues/2
+		portArray := getPortsFromContainers(pod.Spec.Containers)
+		if len(portArray) == 0 {
+			log.Info(ErrNoPorts)
+			return &admissionResponse
+		}
+		ports = strings.Join(portArray, ",")
+	}
+	if v, ok := pod.ObjectMeta.Annotations[virtualNodeNameAnnotation]; ok {
 		name = v
 	} else {
-		log.Info(ErrNoName)
-		return &admissionResponse
+		// if virtual router name isn't specified in the pod annotation, use the controller owner name instead.
+		// https://github.com/awslabs/aws-app-mesh-inject/issues/4
+		if controllerName := getControllerNameForPod(pod, receivedAdmissionReview.Request.Namespace); controllerName != nil {
+			name = fmt.Sprintf("%s-%s", *controllerName, receivedAdmissionReview.Request.Namespace)
+		} else {
+			log.Info(ErrNoName)
+			return &admissionResponse
+		}
 	}
 	log.Info("injecting appmesh pod")
 	log.Infof("Retrieving patch for mesh %v, in region %v, for pod %v, on ports %v, ecr-secrets: %v",
@@ -164,6 +189,52 @@ func (ah AppMeshHandler) mutate(receivedAdmissionReview v1beta1.AdmissionReview)
 	pt := v1beta1.PatchTypeJSONPatch
 	admissionResponse.PatchType = &pt
 	return &admissionResponse
+}
+
+// get the name of the controller that created the pod.
+func getControllerNameForPod(pod corev1.Pod, namespace string) *string {
+	controllerRef := metav1.GetControllerOf(pod.GetObjectMeta())
+	if controllerRef == nil {
+		// An orphan
+		return nil
+	}
+
+	if controllerRef.Kind != apps.SchemeGroupVersion.WithKind("ReplicaSet").Kind {
+		// The pod is not owned by a replica set. Return the controller name directly
+		return &controllerRef.Name
+	}
+	rs, err := clientset.AppsV1().ReplicaSets(namespace).Get(controllerRef.Name, metav1.GetOptions{})
+	if err != nil || rs.UID != controllerRef.UID {
+		log.Errorf("Cannot get replicaset %q for pod %q: %v", controllerRef.Name, pod.Name, err)
+		return nil
+	}
+
+	// Now find the Controller that owns that ReplicaSet.
+	parentControllerRef := metav1.GetControllerOf(rs)
+	if parentControllerRef == nil {
+		// The replica set created the pod
+		return &controllerRef.Name
+	}
+	return &parentControllerRef.Name
+}
+
+// get all the ports from containers
+func getPortsFromContainers(containers []corev1.Container) []string {
+	parts := make([]string, 0)
+	for _, container := range containers {
+		parts = append(parts, getPortsForContainer(container)...)
+	}
+
+	return parts
+}
+
+// get all the ports for that container
+func getPortsForContainer(container corev1.Container) []string {
+	parts := make([]string, 0)
+	for _, p := range container.Ports {
+		parts = append(parts, strconv.Itoa(int(p.ContainerPort)))
+	}
+	return parts
 }
 
 func NewServer(c config.Config) (*http.Server, error) {

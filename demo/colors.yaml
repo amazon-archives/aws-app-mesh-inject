@@ -26,21 +26,22 @@ spec:
     name: color
     color: blue
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: blue
   namespace: appmesh-demo
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: color
+      color: blue
   template:
     metadata:
       labels:
         name: color
         color: blue
-      annotations:
-        appmesh.amazon.com/ports: "80"
-        appmesh.amazon.com/virtualNode: "blue"
     spec:
       containers:
       - name: color
@@ -63,21 +64,24 @@ spec:
     name: color
     color: green
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: color-green
   namespace: appmesh-demo
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: color
+      color: green
   template:
     metadata:
       labels:
         name: color
         color: green
       annotations:
-        appmesh.amazon.com/ports: "80"
-        appmesh.amazon.com/virtualNode: "green"
+        appmesh.k8s.aws/virtualNode: "green"
     spec:
       containers:
       - name: color
@@ -104,21 +108,24 @@ spec:
     name: color
     color: orange
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: color-orange
   namespace: appmesh-demo
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: color
+      color: orange
   template:
     metadata:
       labels:
         name: color
         color: orange
       annotations:
-        appmesh.amazon.com/ports: "80"
-        appmesh.amazon.com/virtualNode: "orange"
+        appmesh.k8s.aws/virtualNode: "orange"
     spec:
       containers:
       - name: color

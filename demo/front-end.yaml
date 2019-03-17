@@ -13,20 +13,20 @@ spec:
   selector:
     name: front-end
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: front-end
   namespace: appmesh-demo
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: front-end
   template:
     metadata:
       labels:
         name: front-end
-      annotations:
-        appmesh.amazon.com/ports: "80"
-        appmesh.amazon.com/virtualNode: "front-end"
     spec:
       containers:
       - name: front-end

@@ -31,23 +31,36 @@ To cleanup you can run
 $ make clean
 ```
 
-### Annotations
- 
+### Enable Sidecar injection
 
-To add and configure sidecars automatically in your pods you will need
-to add an annotation to your pod declaring the ports that will be managed by
-AppMesh, and the name of the AppMesh VirtualNode.
+To enable sidecar injection for a namespace, you need to label the namespace with `appmesh.k8s.aws/sidecarInjectorWebhook=enabled`
 
+```
+kubectl label namespace appmesh-demo appmesh.k8s.aws/sidecarInjectorWebhook=enabled
+```
 
+### Default behavior and how to override
+
+Sidecars will be injected to all pods in the namespace that has enabled sidecar injector webhook. To override, add 
+`appmesh.k8s.aws/sidecarInjectorWebhook: disabled` annotation to the pod spec. 
+
+All container ports defined in the pod spec will be passed to sidecars as application ports. To override, add `appmesh.k8s.aws/ports: "<ports>"` 
+annotation to the pod spec. 
+
+The name of the controller that eventually creates the pod will be used as virtual node name. For example, if a pod 
+is created by a deployment, the deployment name will be used. To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` 
+annotation to the pod spec. 
+
+For example:
 ```yaml
 
     metadata:
       labels:
         name: my-app
       annotations:
-        appmesh.amazon.com/ports: "8079"
-        appmesh.amazon.com/virtualNode: my-app
-
+        appmesh.k8s.aws/ports: "8079,8080"
+        appmesh.k8s.aws/virtualNode: my-app
+        appmesh.k8s.aws/sidecarInjectorWebhook: disabled
 ```
 
 ## Running the Demo

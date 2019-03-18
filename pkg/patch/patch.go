@@ -70,7 +70,13 @@ const (
 		  "name": "AWS_REGION",
 		  "value": "%v"
 		}
-	      ]
+	      ],
+	      "resources": {
+		  	"requests": {
+		  	"cpu": "10m",
+		  	"memory": "32Mi"
+		  	}
+	      }
 	    }
 	`
 	ecr_secret = `{"name": "appmesh-ecr-secret"}`

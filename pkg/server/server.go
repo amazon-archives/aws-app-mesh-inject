@@ -27,14 +27,11 @@ import (
 func init() {
 	corev1.AddToScheme(scheme)
 	admissionregistrationv1beta1.AddToScheme(scheme)
-	flag.StringVar(&tlscert, "tlscert", "/etc/webhook/certs/cert.pem", "Location of TLS Cert file.")
-	flag.StringVar(&tlskey, "tlskey", "/etc/webhook/certs/key.pem", "Location of TLS key file.")
 }
 
 var (
 	scheme                    = runtime.NewScheme()
 	codecs                    = serializer.NewCodecFactory(scheme)
-	tlscert, tlskey           string
 	healthResponse            = []byte("200 - Healthy")
 	wrongContentResponse      = []byte("415 - Wrong Content Type")
 	ErrNoUID                  = errors.New("No UID from request")
@@ -242,7 +239,7 @@ func NewServer(c config.Config) (*http.Server, error) {
 		flag.Parse()
 	}
 	server := NewServerNoSSL(c)
-	sCert, err := tls.LoadX509KeyPair(tlscert, tlskey)
+	sCert, err := tls.LoadX509KeyPair(c.TlsCert, c.TlsKey)
 	if err != nil {
 		return server, err
 	}

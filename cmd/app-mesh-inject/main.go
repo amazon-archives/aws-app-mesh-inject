@@ -28,15 +28,22 @@ import (
 
 var (
 	dev bool
+	cfg config.Config
 )
 
 func init() {
+	flag.StringVar(&cfg.Name, "name", os.Getenv("APPMESH_NAME"), "AWS App Mesh name")
+	flag.StringVar(&cfg.Region, "region", os.Getenv("APPMESH_REGION"), "AWS App Mesh region")
+	flag.StringVar(&cfg.LogLevel, "log-level", os.Getenv("APPMESH_LOG_LEVEL"), "AWS App Mesh envoy log level")
+	flag.BoolVar(&cfg.EcrSecret, "ecr-secret", false, "Inject AWS app mesh pull secrets")
+	flag.StringVar(&cfg.TlsCert, "tlscert", "/etc/webhook/certs/cert.pem", "Location of TLS Cert file.")
+	flag.StringVar(&cfg.TlsKey, "tlskey", "/etc/webhook/certs/key.pem", "Location of TLS key file.")
 	flag.BoolVar(&dev, "dev", false, "Run in dev mode no tls.")
 }
 
 func main() {
 	flag.Parse()
-	log.Info(config.DefaultConfig)
+	log.Info(cfg)
 	var s *http.Server
 	var err error
 	idleConnsClosed := make(chan struct{})
@@ -51,11 +58,11 @@ func main() {
 	}()
 	if dev {
 		log.Info("Serving Appmeshinject without TLS")
-		s = server.NewServerNoSSL(config.DefaultConfig)
+		s = server.NewServerNoSSL(cfg)
 		log.Fatal(s.ListenAndServe())
 	} else {
 		log.Info("Starting new Appmeshinject Server")
-		s, err = server.NewServer(config.DefaultConfig)
+		s, err = server.NewServer(cfg)
 		if err != nil {
 			log.Fatal(err)
 		}

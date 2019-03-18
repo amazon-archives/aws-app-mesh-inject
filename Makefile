@@ -1,10 +1,11 @@
 SHELL=/bin/bash -eo pipefail
 .DEFAULT_GOAL := build
-REGION=$(shell aws configure get region)
-REPO=072792469044.dkr.ecr.${REGION}.amazonaws.com/aws-app-mesh-inject
+MESH_REGION=$(shell aws configure get region)
+IMAGE_REGION=${MESH_REGION}
+REPO=${IMAGE_ACCOUNT}.dkr.ecr.${IMAGE_REGION}.amazonaws.com/amazon/aws-app-mesh-inject
 VERSION=$(shell cat VERSION)
 HASH=$(shell git log --pretty=format:'%H' -n 1)
-TAG=${VERSION}
+IMAGE_TAG=${VERSION}
 
 #
 # Test
@@ -22,14 +23,17 @@ goveralls:
 #
 .PHONY: build push hashtag buildpushhash buildhash pushhash
 build:
-	docker build --no-cache -t ${REPO}:${TAG} .
+	docker build --no-cache -t ${REPO}:${IMAGE_TAG} .
 
 push:
-	aws ecr get-login --region ${REGION} --no-include-email | bash
-	docker push ${REPO}:${TAG}
+ifeq ($(IMAGE_ACCOUNT),)
+    $(error IMAGE_ACCOUNT is not set)
+endif
+	aws ecr get-login --region ${IMAGE_REGION} --no-include-email | bash
+	docker push ${REPO}:${IMAGE_TAG}
 
 hashtag:
-	$(eval export TAG=${HASH})
+	$(eval export IMAGE_TAG=${HASH})
 
 buildpushhash: | hashtag build push
 
@@ -42,18 +46,26 @@ pushhash: | hashtag push
 #
 .PHONY: deployk8s deployk8shash clean
 deployk8s:
-	$(eval export TAG)
-	$(eval export REGION)
+ifeq ($(MESH),)
+    $(error MESH is not set)
+else ifeq ($(IMAGE_ACCOUNT),)
+    $(error IMAGE_ACCOUNT is not set)
+endif
+	$(eval export IMAGE_ACCOUNT)
+	$(eval export IMAGE_TAG)
+	$(eval export IMAGE_REGION)
+	$(eval export MESH_REGION)
 	$(eval export MESH)
-	kubectl apply -f appmesh-ns.yaml
-	./gen-cert.sh
-	./ca-bundle.sh
-	kubectl apply -f manifest-ca.yaml
+	kubectl apply -f deploy/inject-ns.yaml
+	./hack/gen-cert.sh
+	./hack/ca-bundle.sh
+	kubectl apply -f _output/inject.yaml
 
 deployk8shash: | hashtag deployk8s
 
 clean:
-	kubectl delete -f manifest-ca.yaml
+	kubectl delete -f _output/inject.yaml
+	rm -rf ./_output
 
 #
 # Demo
@@ -69,7 +81,6 @@ cleank8sdemo:
 
 appmeshdemo:
 	$(eval export MESH)
-	$(eval export REGION)
 	cd demo/appmesh/ && \
 	./deployappmesh.sh
 
@@ -79,7 +90,6 @@ updatecolors:
 
 cleandemo:
 	$(eval export MESH)
-	$(eval export REGION)
 	kubectl delete -f demo/ns.yaml
 	./demo/appmesh/cleanappmesh.sh
 

@@ -1,11 +1,8 @@
 #!/bin/bash
 title="aws-app-mesh-inject"
+namespace="appmesh-inject"
 
-[ -z ${title} ] && service=sidecar-injector-webhook-svc
-[ -z ${title} ] && secret=sidecar-injector-webhook-certs
-[ -z ${title} ] && namespace=default
-
-csrName=${title}.${title}
+csrName=${title}.${namespace}
 tmpdir=$(mktemp -d)
 echo "creating certs in tmpdir ${tmpdir} "
 
@@ -21,12 +18,12 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 [alt_names]
 DNS.1 = ${title}
-DNS.2 = ${title}.${title}
-DNS.3 = ${title}.${title}.svc
+DNS.2 = ${title}.${namespace}
+DNS.3 = ${title}.${namespace}.svc
 EOF
 
 openssl genrsa -out ${tmpdir}/server-key.pem 2048
-openssl req -new -key ${tmpdir}/server-key.pem -subj "/CN=${title}.${title}.svc" -out ${tmpdir}/server.csr -config ${tmpdir}/csr.conf
+openssl req -new -key ${tmpdir}/server-key.pem -subj "/CN=${title}.${namespace}.svc" -out ${tmpdir}/server.csr -config ${tmpdir}/csr.conf
 
 # clean-up any previously created CSR for our service. Ignore errors if not present.
 kubectl delete csr ${csrName} 2>/dev/null || true
@@ -77,4 +74,4 @@ kubectl create secret generic ${title} \
         --from-file=key.pem=${tmpdir}/server-key.pem \
         --from-file=cert.pem=${tmpdir}/server-cert.pem \
         --dry-run -o yaml |
-    kubectl -n ${title} apply -f -
+    kubectl -n ${namespace} apply -f -

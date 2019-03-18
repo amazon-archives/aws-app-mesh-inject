@@ -1,9 +1,0 @@
-{
-    "apiVersion": "v1",
-    "kind": "Pod",
-    "metadata": {
-        "annotations": {
-            "appmesh.amazon.com/ports": "80"
-        }
-    }
-}

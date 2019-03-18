@@ -7,4 +7,5 @@ type Config struct {
 	EcrSecret bool
 	TlsCert   string
 	TlsKey    string
+	Port      int
 }

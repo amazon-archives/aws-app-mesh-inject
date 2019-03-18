@@ -16,57 +16,77 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/server"
+	"github.com/awslabs/aws-app-mesh-inject/pkg/signals"
+	"github.com/awslabs/aws-app-mesh-inject/pkg/webhook"
 	log "github.com/sirupsen/logrus"
-	"net/http"
+	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/klog"
 	"os"
-	"os/signal"
+	"time"
 )
 
 var (
-	dev bool
-	cfg config.Config
+	masterURL  string
+	kubeconfig string
+	enableTLS  bool
+	cfg        config.Config
 )
 
 func init() {
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&cfg.Name, "name", os.Getenv("APPMESH_NAME"), "AWS App Mesh name")
 	flag.StringVar(&cfg.Region, "region", os.Getenv("APPMESH_REGION"), "AWS App Mesh region")
 	flag.StringVar(&cfg.LogLevel, "log-level", os.Getenv("APPMESH_LOG_LEVEL"), "AWS App Mesh envoy log level")
 	flag.BoolVar(&cfg.EcrSecret, "ecr-secret", false, "Inject AWS app mesh pull secrets")
+	flag.IntVar(&cfg.Port, "port", 8080, "Webhook port")
 	flag.StringVar(&cfg.TlsCert, "tlscert", "/etc/webhook/certs/cert.pem", "Location of TLS Cert file.")
 	flag.StringVar(&cfg.TlsKey, "tlskey", "/etc/webhook/certs/key.pem", "Location of TLS key file.")
-	flag.BoolVar(&dev, "dev", false, "Run in dev mode no tls.")
+	flag.BoolVar(&enableTLS, "enable-tls", true, "Enable TLS.")
 }
 
 func main() {
+	flag.Set("logtostderr", "true")
+	klog.InitFlags(nil)
 	flag.Parse()
-	log.Info(cfg)
-	var s *http.Server
-	var err error
-	idleConnsClosed := make(chan struct{})
-	go func() {
-		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt)
-		<-sigint
-		if err := s.Shutdown(context.Background()); err != nil {
-			log.Printf("Appmeshinject server Shutdown: %v", err)
-		}
-		close(idleConnsClosed)
-	}()
-	if dev {
-		log.Info("Serving Appmeshinject without TLS")
-		s = server.NewServerNoSSL(cfg)
-		log.Fatal(s.ListenAndServe())
-	} else {
-		log.Info("Starting new Appmeshinject Server")
-		s, err = server.NewServer(cfg)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Fatal(s.ListenAndServeTLS("", ""))
+
+	// init Kubernetes config
+	kubeConfig, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	if err != nil {
+		log.Fatalf("Error building kubeconfig: %v", err)
 	}
-	<-idleConnsClosed
+
+	// init Kubernetes client
+	kubeClient, err := kubernetes.NewForConfig(kubeConfig)
+	if err != nil {
+		log.Fatalf("Error building kubernetes clientset: %v", err)
+	}
+
+	// init Kubernetes deserializer
+	scheme := runtime.NewScheme()
+	corev1.AddToScheme(scheme)
+	admissionregistrationv1beta1.AddToScheme(scheme)
+	codecs := serializer.NewCodecFactory(scheme)
+	kubeDecoder := codecs.UniversalDeserializer()
+
+	// init webhook HTTP server
+	srv := &webhook.Server{
+		Config:      cfg,
+		KubeClient:  kubeClient,
+		KubeDecoder: kubeDecoder,
+	}
+
+	// start HTTP server
+	stopCh := signals.SetupSignalHandler()
+	go srv.ListenAndServe(enableTLS, 5*time.Second, stopCh)
+
+	// wait for SIGTERM
+	<-stopCh
 }

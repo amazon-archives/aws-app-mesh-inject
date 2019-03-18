@@ -18,13 +18,12 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
+	"github.com/awslabs/aws-app-mesh-inject/pkg/server"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
-
-	log "github.com/sirupsen/logrus"
-	"github.com/awslabs/aws-app-mesh-inject/config"
-	"github.com/awslabs/aws-app-mesh-inject/server"
 )
 
 var (

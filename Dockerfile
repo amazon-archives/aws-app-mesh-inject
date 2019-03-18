@@ -15,7 +15,8 @@ RUN go mod download
 
 COPY  . .
 RUN adduser -D -u 10001 webhook
-RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o appmeshinject
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' \
+    -o appmeshinject ./cmd/app-mesh-inject/*.go
 
 FROM scratch
 COPY --from=build-env /go/src/github.com/awslabs/aws-app-mesh-inject/appmeshinject .

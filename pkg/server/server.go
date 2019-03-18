@@ -6,9 +6,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
+	"github.com/awslabs/aws-app-mesh-inject/pkg/patch"
 	log "github.com/sirupsen/logrus"
-	"github.com/awslabs/aws-app-mesh-inject/config"
-	"github.com/awslabs/aws-app-mesh-inject/patch"
 	"io/ioutil"
 	"k8s.io/api/admission/v1beta1"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
@@ -32,7 +32,7 @@ func init() {
 }
 
 var (
-	scheme               	  = runtime.NewScheme()
+	scheme                    = runtime.NewScheme()
 	codecs                    = serializer.NewCodecFactory(scheme)
 	tlscert, tlskey           string
 	healthResponse            = []byte("200 - Healthy")
@@ -46,7 +46,7 @@ var (
 	sidecarInjectAnnotation   = "appmesh.k8s.aws/sidecarInjectorWebhook"
 
 	kubeconfig, _ = rest.InClusterConfig()
-	clientset, _ = kubernetes.NewForConfig(kubeconfig)
+	clientset, _  = kubernetes.NewForConfig(kubeconfig)
 )
 
 func admissionResponseError(err error) *v1beta1.AdmissionResponse {

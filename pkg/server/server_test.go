@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/awslabs/aws-app-mesh-inject/config"
+	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
 	"k8s.io/api/admission/v1beta1"
 )
 

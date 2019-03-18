@@ -115,6 +115,7 @@ func (s *Server) injectHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
+	defer r.Body.Close()
 
 	body, err = ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -122,7 +123,6 @@ func (s *Server) injectHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer r.Body.Close()
 
 	receivedAdmissionReview := v1beta1.AdmissionReview{}
 	returnedAdmissionReview := v1beta1.AdmissionReview{}

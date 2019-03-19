@@ -17,6 +17,10 @@ package main
 
 import (
 	"flag"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/session"
+
 	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
 	"github.com/awslabs/aws-app-mesh-inject/pkg/signals"
 	"github.com/awslabs/aws-app-mesh-inject/pkg/webhook"
@@ -50,6 +54,19 @@ func init() {
 	flag.StringVar(&cfg.TlsCert, "tlscert", "/etc/webhook/certs/cert.pem", "Location of TLS Cert file.")
 	flag.StringVar(&cfg.TlsKey, "tlskey", "/etc/webhook/certs/key.pem", "Location of TLS key file.")
 	flag.BoolVar(&enableTLS, "enable-tls", true, "Enable TLS.")
+
+	if cfg.Region == "" {
+		// Use region from ec2 metadata service by default
+		session, err := session.NewSession(&aws.Config{})
+		if err != nil {
+			log.Fatal("Failed to create an aws config session", err)
+		}
+		metadata := ec2metadata.New(session)
+		cfg.Region, err = metadata.Region()
+		if err != nil {
+			log.Fatal("Failed to determine the region from ec2 metadata", err)
+		}
+	}
 }
 
 func main() {

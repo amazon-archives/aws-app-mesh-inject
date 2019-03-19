@@ -122,7 +122,7 @@ const admissionReview = `
 func mockServer() *Server {
 	cfg := config.Config{
 		Port:     8080,
-		Name:     "global",
+		MeshName: "global",
 		Region:   "us-west-2",
 		LogLevel: "debug",
 	}

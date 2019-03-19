@@ -3,113 +3,56 @@ package patch
 import "fmt"
 
 const (
-	initContainer = `
-	    {
-	      "name": "proxyinit",
-	      "image": "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:latest",
-	      "securityContext": {
-		  "capabilities": {
-		      "add": [
-			"NET_ADMIN"
-		      ]
-		  }
-		},
-	      "env": [
-		{
-		  "name": "APPMESH_START_ENABLED",
-		  "value": "1"
-		},
-		{
-		  "name": "APPMESH_IGNORE_UID",
-		  "value": "1337"
-		},
-		{
-		  "name": "APPMESH_ENVOY_INGRESS_PORT",
-		  "value": "15000"
-		},
-		{
-		  "name": "APPMESH_ENVOY_EGRESS_PORT",
-		  "value": "15001"
-		},
-		{
-		  "name": "APPMESH_APP_PORTS",
-		  "value": "%v"
-		},
-		{
-		  "name": "APPMESH_EGRESS_IGNORED_IP",
-		  "value": "169.254.169.254"
-		}
-	      ]
-	    }
-	`
-	container = `
-	    {
-	      "name": "envoy",
-	      "image": "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.8.0.2-beta",
-	      "securityContext":
-		{
-		  "runAsUser": 1337
-		},
-	      "ports": [
-		{
-		  "containerPort": 9901,
-		  "name": "stats",
-		  "protocol": "TCP"
-		}
-	      ],
-	      "env": [
-		{
-		  "name": "APPMESH_VIRTUAL_NODE_NAME",
-		  "value": "mesh/%v/virtualNode/%v"
-		},
-		{
-		  "name": "ENVOY_LOG_LEVEL",
-		  "value": "%v"
-		},
-		{
-		  "name": "AWS_REGION",
-		  "value": "%v"
-		}
-	      ],
-	      "resources": {
-		  	"requests": {
-		  	"cpu": "10m",
-		  	"memory": "32Mi"
-		  	}
-	      }
-	    }
-	`
-	ecr_secret = `{"name": "appmesh-ecr-secret"}`
-	create     = `{"op":"add","path":"/spec/%v", "value": [%v]}`
-	add        = `{"op":"add","path":"/spec/%v/-", "value": %v}`
+	ecrSecret = `{"name": "appmesh-ecr-secret"}`
+	create    = `{"op":"add","path":"/spec/%v", "value": [%v]}`
+	add       = `{"op":"add","path":"/spec/%v/-", "value": %v}`
 )
 
-func GetPatch(i, c, e int, mesh, region, virtualnode, ports, log string, ecr bool) []byte {
-	//TODO: cleanup all this code
-	init := fmt.Sprintf(initContainer, ports)
-	cont := fmt.Sprintf(container, mesh, virtualnode, log, region)
-	var initPatch string
-	var contPatch string
-	if i > 0 {
-		initPatch = fmt.Sprintf(add, "initContainers", init)
-	} else {
-		initPatch = fmt.Sprintf(create, "initContainers", init)
+type Meta struct {
+	AppendInit            bool
+	AppendSidecar         bool
+	AppendImagePullSecret bool
+	HasImagePullSecret    bool
+	Init                  InitMeta
+	Sidecar               SidecarMeta
+}
+
+func GeneratePatch(meta Meta) ([]byte, error) {
+	var patch string
+
+	initPatch, err := renderInit(meta.Init)
+	if err != nil {
+		return []byte(patch), err
 	}
-	if c > 0 {
-		contPatch = fmt.Sprintf(add, "containers", cont)
+
+	if meta.AppendInit {
+		initPatch = fmt.Sprintf(add, "initContainers", initPatch)
 	} else {
-		contPatch = fmt.Sprintf(create, "containers", cont)
+		initPatch = fmt.Sprintf(create, "initContainers", initPatch)
 	}
-	if ecr {
+
+	sidecarPatch, err := renderSidecar(meta.Sidecar)
+	if err != nil {
+		return []byte(patch), err
+	}
+
+	if meta.AppendSidecar {
+		sidecarPatch = fmt.Sprintf(add, "containers", sidecarPatch)
+	} else {
+		sidecarPatch = fmt.Sprintf(create, "containers", sidecarPatch)
+	}
+
+	if meta.HasImagePullSecret {
 		var ecrPatch string
-		if e > 0 {
-			ecrPatch = fmt.Sprintf(add, "imagePullSecrets", ecr_secret)
+		if meta.AppendImagePullSecret {
+			ecrPatch = fmt.Sprintf(add, "imagePullSecrets", ecrSecret)
 		} else {
-			ecrPatch = fmt.Sprintf(create, "imagePullSecrets", ecr_secret)
+			ecrPatch = fmt.Sprintf(create, "imagePullSecrets", ecrSecret)
 		}
-		patch := fmt.Sprintf("[%v,%v,%v]", initPatch, contPatch, ecrPatch)
-		return []byte(patch)
+		patch = fmt.Sprintf("[%v,%v,%v]", initPatch, sidecarPatch, ecrPatch)
+	} else {
+		patch = fmt.Sprintf("[%v,%v]", initPatch, sidecarPatch)
 	}
-	patch := fmt.Sprintf("[%v,%v]", initPatch, contPatch)
-	return []byte(patch)
+
+	return []byte(patch), nil
 }

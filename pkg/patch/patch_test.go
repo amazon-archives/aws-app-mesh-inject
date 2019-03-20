@@ -1,7 +1,6 @@
 package patch
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -32,8 +31,6 @@ func TestGeneratePatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fmt.Println(string(patch))
 
 	if !strings.Contains(string(patch), "aws-appmesh-proxy-route-manager:latest") {
 		t.Errorf("Init container image not found")

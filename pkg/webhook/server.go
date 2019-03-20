@@ -193,7 +193,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		// if virtual router name isn't specified in the pod annotation, use the controller owner name instead.
 		// https://github.com/awslabs/aws-app-mesh-inject/issues/4
 		if controllerName := s.getControllerNameForPod(pod, receivedAdmissionReview.Request.Namespace); controllerName != nil {
-			name = fmt.Sprintf("%s-%s", *controllerName, receivedAdmissionReview.Request.Namespace)
+			name = *controllerName
 		} else {
 			log.Info(ErrNoName)
 			return &admissionResponse

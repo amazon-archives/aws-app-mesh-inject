@@ -1,7 +1,6 @@
 package patch
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -13,14 +12,12 @@ func Test_Init(t *testing.T) {
 		IgnoredIPs:     "169.254.169.254",
 	}
 
-	sidecar, err := renderInit(meta)
+	init, err := renderInit(meta)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Println(sidecar)
-
-	if !strings.Contains(sidecar, "80,443") {
+	if !strings.Contains(init, "80,443") {
 		t.Errorf("Ports not found")
 	}
 }

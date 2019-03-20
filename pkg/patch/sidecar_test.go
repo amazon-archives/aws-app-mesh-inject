@@ -1,7 +1,6 @@
 package patch
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -21,8 +20,6 @@ func Test_Sidecar(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fmt.Println(sidecar)
 
 	if !strings.Contains(sidecar, "mesh/global/virtualNode/podinfo") {
 		t.Errorf("Virtual node not found")

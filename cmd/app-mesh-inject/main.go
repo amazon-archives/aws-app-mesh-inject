@@ -20,7 +20,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-
 	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
 	"github.com/awslabs/aws-app-mesh-inject/pkg/signals"
 	"github.com/awslabs/aws-app-mesh-inject/pkg/webhook"
@@ -46,7 +45,7 @@ var (
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	flag.StringVar(&cfg.Name, "name", os.Getenv("APPMESH_NAME"), "AWS App Mesh name")
+	flag.StringVar(&cfg.MeshName, "mesh-name", os.Getenv("APPMESH_NAME"), "AWS App Mesh name")
 	flag.StringVar(&cfg.Region, "region", os.Getenv("APPMESH_REGION"), "AWS App Mesh region")
 	flag.StringVar(&cfg.LogLevel, "log-level", os.Getenv("APPMESH_LOG_LEVEL"), "AWS App Mesh envoy log level")
 	flag.BoolVar(&cfg.EcrSecret, "ecr-secret", false, "Inject AWS app mesh pull secrets")
@@ -54,19 +53,11 @@ func init() {
 	flag.StringVar(&cfg.TlsCert, "tlscert", "/etc/webhook/certs/cert.pem", "Location of TLS Cert file.")
 	flag.StringVar(&cfg.TlsKey, "tlskey", "/etc/webhook/certs/key.pem", "Location of TLS key file.")
 	flag.BoolVar(&enableTLS, "enable-tls", true, "Enable TLS.")
-
-	if cfg.Region == "" {
-		// Use region from ec2 metadata service by default
-		session, err := session.NewSession(&aws.Config{})
-		if err != nil {
-			log.Fatal("Failed to create an aws config session", err)
-		}
-		metadata := ec2metadata.New(session)
-		cfg.Region, err = metadata.Region()
-		if err != nil {
-			log.Fatal("Failed to determine the region from ec2 metadata", err)
-		}
-	}
+	flag.StringVar(&cfg.SidecarImage, "sidecar-image", "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.8.0.2-beta", "Envoy sidecar container image.")
+	flag.StringVar(&cfg.SidecarCpu, "sidecar-cpu-requests", "10m", "Envoy sidecar CPU resources requests.")
+	flag.StringVar(&cfg.SidecarMemory, "sidecar-memory-requests", "32Mi", "Envoy sidecar memory resources requests.")
+	flag.StringVar(&cfg.InitImage, "init-image", "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:latest", "Init container image.")
+	flag.StringVar(&cfg.IgnoredIPs, "ignored-ips", "169.254.169.254", "Init container ignored IPs.")
 }
 
 func main() {
@@ -92,6 +83,20 @@ func main() {
 	admissionregistrationv1beta1.AddToScheme(scheme)
 	codecs := serializer.NewCodecFactory(scheme)
 	kubeDecoder := codecs.UniversalDeserializer()
+
+	// set default region
+	if cfg.Region == "" {
+		// Use region from ec2 metadata service by default
+		s, err := session.NewSession(&aws.Config{})
+		if err != nil {
+			log.Fatal("Failed to create an aws config session", err)
+		}
+		metadata := ec2metadata.New(s)
+		cfg.Region, err = metadata.Region()
+		if err != nil {
+			log.Fatal("Failed to determine the region from ec2 metadata", err)
+		}
+	}
 
 	// init webhook HTTP server
 	srv := &webhook.Server{

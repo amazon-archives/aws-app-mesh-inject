@@ -200,19 +200,35 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		}
 	}
 
+	log.Infof("Patching pod %v", pod.ObjectMeta)
+
 	// patch pod spec
-	admissionResponse.Patch = patch.GetPatch(
-		len(pod.Spec.InitContainers),
-		len(pod.Spec.Containers),
-		len(pod.Spec.ImagePullSecrets),
-		s.Config.Name,
-		s.Config.Region,
-		name,
-		ports,
-		s.Config.LogLevel,
-		s.Config.EcrSecret,
-	)
-	log.Infof("Patch %v", string(admissionResponse.Patch))
+	podPatch, err := patch.GeneratePatch(patch.Meta{
+		HasImagePullSecret:    s.Config.EcrSecret,
+		AppendImagePullSecret: len(pod.Spec.ImagePullSecrets) > 0,
+		AppendInit:            len(pod.Spec.InitContainers) > 0,
+		AppendSidecar:         len(pod.Spec.Containers) > 0,
+		Init: patch.InitMeta{
+			Ports:          ports,
+			ContainerImage: s.Config.InitImage,
+			IgnoredIPs:     s.Config.IgnoredIPs,
+		},
+		Sidecar: patch.SidecarMeta{
+			VirtualNodeName: name,
+			ContainerImage:  s.Config.SidecarImage,
+			LogLevel:        s.Config.LogLevel,
+			Region:          s.Config.Region,
+			MeshName:        s.Config.MeshName,
+			MemoryRequests:  s.Config.SidecarMemory,
+			CpuRequests:     s.Config.SidecarCpu,
+		},
+	})
+	if err != nil {
+		log.Error(err)
+		return admissionResponseError(err)
+	}
+
+	admissionResponse.Patch = podPatch
 	pt := v1beta1.PatchTypeJSONPatch
 	admissionResponse.PatchType = &pt
 

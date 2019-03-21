@@ -2,7 +2,6 @@
 
 The AWS AppMesh Kubernetes sidecar injecting Admission Controller.
 
-
 ## Running
 To run this sidecar injector or the demo you need both the [aws cli](https://aws.amazon.com/cli/)
  and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
@@ -44,19 +43,18 @@ kubectl label namespace appmesh-demo appmesh.k8s.aws/sidecarInjectorWebhook=enab
 Sidecars will be injected to all pods in the namespace that has enabled sidecar injector webhook. To override, add 
 `appmesh.k8s.aws/sidecarInjectorWebhook: disabled` annotation to the pod spec. 
 
-All container ports defined in the pod spec will be passed to sidecars as application ports. To override, add `appmesh.k8s.aws/ports: "<ports>"` 
-annotation to the pod spec. 
+All container ports defined in the pod spec will be passed to sidecars as application ports. 
+To override, add `appmesh.k8s.aws/ports: "<ports>"` annotation to the pod spec. 
 
 The name of the controller that eventually creates the pod will be used as virtual node name. For example, if a pod 
-is created by a deployment, the deployment name will be used. To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` 
-annotation to the pod spec. 
+is created by a deployment, the virtual node name will be `<deployment name>-<namespace>`. 
+To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` annotation to the pod spec. 
 
 For example:
 ```yaml
-
     metadata:
       labels:
-        name: my-app
+        app: my-app
       annotations:
         appmesh.k8s.aws/ports: "8079,8080"
         appmesh.k8s.aws/virtualNode: my-app
@@ -97,7 +95,7 @@ and visit http://localhost:8000/
 
 You should see a lot of red requests
 
-![demo screenshot1](https://raw.githubusercontent.com/awslabs/aws-app-mesh-inject/master/img/screenshot1.png)
+![demo screenshot1](img/screenshot1.png)
 
 The mesh need to be made aware of your pods and how to route them, so you need to run
 
@@ -107,7 +105,7 @@ $ make appmeshdemo
 
 After a few minutes the demo front-end should switch from all red to around 50% green and 50% blue.
 
-![demo screenshot2](https://raw.githubusercontent.com/awslabs/aws-app-mesh-inject/master/img/screenshot2.png)
+![demo screenshot2](img/screenshot2.png)
 
 This routing is based on demo/appmesh/colors.r.json
 ```

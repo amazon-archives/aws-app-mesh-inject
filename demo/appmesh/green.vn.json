@@ -3,16 +3,16 @@
         "listeners": [
             {
                 "portMapping": {
-                    "port": 80,
+                    "port": 8080,
                     "protocol": "http"
                 }
             }
         ],
         "serviceDiscovery": {
             "dns": {
-                "serviceName": "green"
+                "hostname": "green"
             }
         }
     },
-    "virtualNodeName": "green"
+    "virtualNodeName": "green-appmesh-demo"
 }

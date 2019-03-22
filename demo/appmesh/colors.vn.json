@@ -3,14 +3,14 @@
         "listeners": [
             {
                 "portMapping": {
-                    "port": 80,
+                    "port": 8080,
                     "protocol": "http"
                 }
             }
         ],
         "serviceDiscovery": {
             "dns": {
-                "serviceName": "colors"
+                "hostname": "colors"
             }
         }
     },

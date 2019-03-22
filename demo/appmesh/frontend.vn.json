@@ -10,13 +10,17 @@
         ],
         "serviceDiscovery": {
             "dns": {
-                "serviceName": "front-end.appmesh-demo.svc.cluster.local"
+                "hostname": "front-end.appmesh-demo.svc.cluster.local"
             }
         },
+
         "backends": [
-            "colors.appmesh-demo.svc.cluster.local",
-            "colors"
+            {
+                "virtualService": {
+                    "virtualServiceName": "colors"
+                }
+            }
         ]
     },
-    "virtualNodeName": "front-end"
+    "virtualNodeName": "front-end-appmesh-demo"
 }

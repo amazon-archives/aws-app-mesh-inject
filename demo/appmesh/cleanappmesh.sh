@@ -1,5 +1,9 @@
 #!/bin/bash
 set -x
+
+echo "Deleing virtual service for colors"
+aws appmesh delete-virtual-service --mesh-name ${MESH} --virtual-service-name colors
+
 echo "Deleting colors route"
 aws appmesh delete-route --mesh-name ${MESH} --route-name colors-route --virtual-router-name colors
 

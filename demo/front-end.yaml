@@ -33,5 +33,5 @@ spec:
         image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/meshdemo-frontend:0.1.0-beta
         ports:
         - containerPort: 8000
-        args: ["--rewrite", "/cats -> http://cats", "--rewrite", "/colors -> http://colors"]
+        args: ["--rewrite", "/cats -> http://cats", "--rewrite", "/colors -> http://colors:8080"]
 

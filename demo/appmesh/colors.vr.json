@@ -1,7 +1,12 @@
 {
     "spec": {
-        "serviceNames": [
-            "colors"
+        "listeners": [
+            {
+                "portMapping": {
+                    "port": 8080,
+                    "protocol": "http"
+                }
+            }
         ]
     },
     "virtualRouterName": "colors"

@@ -3,16 +3,16 @@
         "listeners": [
             {
                 "portMapping": {
-                    "port": 80,
+                    "port": 8080,
                     "protocol": "http"
                 }
             }
         ],
         "serviceDiscovery": {
             "dns": {
-                "serviceName": "orange.appmesh-demo.svc.cluster.local"
+                "hostname": "orange.appmesh-demo.svc.cluster.local"
             }
         }
     },
-    "virtualNodeName": "orange"
+    "virtualNodeName": "orange-appmesh-demo"
 }

@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: appmesh-demo
   labels:
-    appmesh.k8s.aws/sidecarInjectorWebhook : enabled
+    appmesh.k8s.aws/sidecarInjectorWebhook: enabled

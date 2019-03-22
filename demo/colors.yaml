@@ -8,8 +8,7 @@ metadata:
   namespace: appmesh-demo
 spec:
   ports:
-  - port: 80
-    targetPort: 80
+  - port: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -20,8 +19,7 @@ metadata:
   namespace: appmesh-demo
 spec:
   ports:
-  - port: 80
-    targetPort: 80
+  - port: 8080
   selector:
     name: color
     color: blue
@@ -45,9 +43,13 @@ spec:
     spec:
       containers:
       - name: color
-        image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/meshdemo-colors:0.1.0-beta
+        image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/meshdemo-colors:0.1.1-beta
         ports:
-        - containerPort: 80
+        - containerPort: 8080
+        command: ["/main"]
+        args: 
+          - "-color"
+          - "blue"
 ---
 apiVersion: v1
 kind: Service
@@ -58,8 +60,7 @@ metadata:
   namespace: appmesh-demo
 spec:
   ports:
-  - port: 80
-    targetPort: 80
+  - port: 8080
   selector:
     name: color
     color: green
@@ -85,13 +86,9 @@ spec:
     spec:
       containers:
       - name: color
-        image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/meshdemo-colors:0.1.0-beta
+        image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/meshdemo-colors:0.1.1-beta
         ports:
-        - containerPort: 80
-        command: ["/main"]
-        args: 
-          - "-color"
-          - "green"
+        - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -102,8 +99,7 @@ metadata:
   namespace: appmesh-demo
 spec:
   ports:
-  - port: 80
-    targetPort: 80
+  - port: 8080
   selector:
     name: color
     color: orange
@@ -129,9 +125,9 @@ spec:
     spec:
       containers:
       - name: color
-        image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/meshdemo-colors:0.1.0-beta
+        image: 072792469044.dkr.ecr.eu-west-1.amazonaws.com/meshdemo-colors:0.1.1-beta
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         command: ["/main"]
         args: 
           - "-color"

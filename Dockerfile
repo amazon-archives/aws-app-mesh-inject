@@ -3,8 +3,8 @@ FROM golang:1.12-alpine AS build-env
 
 RUN apk add git
 
-RUN mkdir -p /go/src/github.com/awslabs/aws-app-mesh-inject
-WORKDIR /go/src/github.com/awslabs/aws-app-mesh-inject
+RUN mkdir -p /go/src/github.com/aws/aws-app-mesh-inject
+WORKDIR /go/src/github.com/aws/aws-app-mesh-inject
 
 ENV GO111MODULE=on
 
@@ -19,7 +19,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' \
     -o appmeshinject ./cmd/app-mesh-inject/*.go
 
 FROM scratch
-COPY --from=build-env /go/src/github.com/awslabs/aws-app-mesh-inject/appmeshinject .
+COPY --from=build-env /go/src/github.com/aws/aws-app-mesh-inject/appmeshinject .
 COPY --from=build-env /etc/passwd /etc/passwd
 USER webhook
 ENTRYPOINT ["/appmeshinject"]

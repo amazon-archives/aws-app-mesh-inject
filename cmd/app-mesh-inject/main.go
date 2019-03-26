@@ -17,13 +17,12 @@ package main
 
 import (
 	"flag"
+	"github.com/aws/aws-app-mesh-inject/pkg/config"
+	"github.com/aws/aws-app-mesh-inject/pkg/signals"
+	"github.com/aws/aws-app-mesh-inject/pkg/webhook"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/signals"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/webhook"
-	log "github.com/sirupsen/logrus"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,13 +67,13 @@ func main() {
 	// init Kubernetes config
 	kubeConfig, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	if err != nil {
-		log.Fatalf("Error building kubeconfig: %v", err)
+		klog.Fatalf("Error building kubeconfig: %v", err)
 	}
 
 	// init Kubernetes client
 	kubeClient, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
-		log.Fatalf("Error building kubernetes clientset: %v", err)
+		klog.Fatalf("Error building kubernetes clientset: %v", err)
 	}
 
 	// init Kubernetes deserializer
@@ -89,12 +88,12 @@ func main() {
 		// Use region from ec2 metadata service by default
 		s, err := session.NewSession(&aws.Config{})
 		if err != nil {
-			log.Fatal("Failed to create an aws config session", err)
+			klog.Fatal("Failed to create an aws config session", err)
 		}
 		metadata := ec2metadata.New(s)
 		cfg.Region, err = metadata.Region()
 		if err != nil {
-			log.Fatal("Failed to determine the region from ec2 metadata", err)
+			klog.Fatal("Failed to determine the region from ec2 metadata", err)
 		}
 	}
 

@@ -2,7 +2,7 @@ package webhook
 
 import (
 	"bytes"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
+	"github.com/aws/aws-app-mesh-inject/pkg/config"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

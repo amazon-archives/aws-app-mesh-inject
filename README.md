@@ -16,6 +16,8 @@ $ export MESH_NAME=my_mesh_name
 ```
 Now you can deploy the appmesh injector
 
+### Option 1: clone the repository (You can also run the demo)
+
 ```bash
 $ make deploy
 ```
@@ -26,6 +28,16 @@ your cluster.
 To cleanup you can run
 ```
 $ make clean
+```
+
+### Option 2: download and execute the install script
+```bash
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/hack/install.sh | bash
+```
+
+To cleanup you can run
+```
+$ kubectl delete namespace appmesh-inject
 ```
 
 ## Running the Demo

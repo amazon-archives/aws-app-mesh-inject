@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"github.com/aws/aws-app-mesh-inject/pkg/config"
 	"github.com/aws/aws-app-mesh-inject/pkg/patch"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/pkg/apis/apps"
 	"net/http"
 	"strconv"
@@ -59,24 +59,24 @@ func (s *Server) ListenAndServe(enableTLS bool, timeout time.Duration, stopCh <-
 	if enableTLS {
 		cert, err := tls.LoadX509KeyPair(s.Config.TlsCert, s.Config.TlsKey)
 		if err != nil {
-			log.Panicf("TLS cert loading failed %s", err.Error())
+			klog.Fatalf("TLS cert loading failed %s", err.Error())
 		}
 		srv.TLSConfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
 	}
 
-	log.Infof("Starting HTTP server on port %v", s.Config.Port)
+	klog.Infof("Starting HTTP server on port %v", s.Config.Port)
 
 	// run server in background
 	go func() {
 		if enableTLS {
 			if err := srv.ListenAndServeTLS("", ""); err != http.ErrServerClosed {
-				log.Fatalf("HTTP server crashed %v", err)
+				klog.Fatalf("HTTP server crashed %v", err)
 			}
 		} else {
 			if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-				log.Fatalf("HTTP server crashed %v", err)
+				klog.Fatalf("HTTP server crashed %v", err)
 			}
 		}
 	}()
@@ -88,9 +88,9 @@ func (s *Server) ListenAndServe(enableTLS bool, timeout time.Duration, stopCh <-
 
 	// try graceful shutdown
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Errorf("HTTP server graceful shutdown failed %v", err)
+		klog.Errorf("HTTP server graceful shutdown failed %v", err)
 	} else {
-		log.Info("HTTP server stopped")
+		klog.Info("HTTP server stopped")
 	}
 }
 
@@ -119,7 +119,7 @@ func (s *Server) injectHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err = ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Error(err)
+		klog.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -129,10 +129,10 @@ func (s *Server) injectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// decode pod spec and patch it
 	if err = s.decode(body, &receivedAdmissionReview); err != nil {
-		log.Error(err)
+		klog.Error(err)
 		admissionResponse = admissionResponseError(err)
 	} else if err = validateRequest(receivedAdmissionReview); err != nil {
-		log.Error(err)
+		klog.Error(err)
 		admissionResponse = admissionResponseError(err)
 	} else {
 		admissionResponse = s.mutate(receivedAdmissionReview)
@@ -142,13 +142,13 @@ func (s *Server) injectHandler(w http.ResponseWriter, r *http.Request) {
 	returnedAdmissionReview.Response = admissionResponse
 	resp, err := json.Marshal(returnedAdmissionReview)
 	if err != nil {
-		log.Error(err)
+		klog.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if _, err := w.Write(resp); err != nil {
-		log.Error(err)
+		klog.Error(err)
 	}
 }
 
@@ -161,14 +161,14 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 	pod := corev1.Pod{}
 
 	if err := json.Unmarshal(receivedAdmissionReview.Request.Object.Raw, &pod); err != nil {
-		log.Error(err)
+		klog.Error(err)
 		return admissionResponseError(err)
 	}
 
 	// If sidecar injection is disabled in the annotation, we skip mutating
 	switch strings.ToLower(pod.ObjectMeta.Annotations[sidecarInjectAnnotation]) {
 	case "disabled":
-		log.Info("Sidecar inject is disabled. Skipping mutating")
+		klog.Info("Sidecar inject is disabled. Skipping mutating")
 		return &admissionResponse
 	}
 
@@ -180,7 +180,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		// https://github.com/aws/aws-app-mesh-inject/issues/2
 		portArray := getPortsFromContainers(pod.Spec.Containers)
 		if len(portArray) == 0 {
-			log.Info(ErrNoPorts)
+			klog.Info(ErrNoPorts)
 			return &admissionResponse
 		}
 		ports = strings.Join(portArray, ",")
@@ -195,12 +195,12 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		if controllerName := s.getControllerNameForPod(pod, receivedAdmissionReview.Request.Namespace); controllerName != nil {
 			name = fmt.Sprintf("%s-%s", *controllerName, receivedAdmissionReview.Request.Namespace)
 		} else {
-			log.Info(ErrNoName)
+			klog.Info(ErrNoName)
 			return &admissionResponse
 		}
 	}
 
-	log.Infof("Patching pod %v", pod.ObjectMeta)
+	klog.Infof("Patching pod %v", pod.ObjectMeta)
 
 	// patch pod spec
 	podPatch, err := patch.GeneratePatch(patch.Meta{
@@ -224,7 +224,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		},
 	})
 	if err != nil {
-		log.Error(err)
+		klog.Error(err)
 		return admissionResponseError(err)
 	}
 
@@ -273,7 +273,7 @@ func (s *Server) getControllerNameForPod(pod corev1.Pod, namespace string) *stri
 	}
 	rs, err := s.KubeClient.AppsV1().ReplicaSets(namespace).Get(controllerRef.Name, metav1.GetOptions{})
 	if err != nil || rs.UID != controllerRef.UID {
-		log.Errorf("Cannot get replicaset %q for pod %q: %v", controllerRef.Name, pod.Name, err)
+		klog.Errorf("Cannot get replicaset %q for pod %q: %v", controllerRef.Name, pod.Name, err)
 		return nil
 	}
 

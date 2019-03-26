@@ -2,9 +2,13 @@
 
 The AWS AppMesh Kubernetes sidecar injecting Admission Controller.
 
-## Running
-To run this sidecar injector or the demo you need both [jq](https://stedolan.github.io/jq/download/)
- and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+
+## Prerequisites
+* [openssl](https://www.openssl.org/source/)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+* [jq](https://stedolan.github.io/jq/download/)
+
+## Install
 
 To deploy the sidecar injector you must export the name of your new mesh
 ```
@@ -22,37 +26,6 @@ your cluster.
 To cleanup you can run
 ```
 $ make clean
-```
-
-### Enable Sidecar injection
-
-To enable sidecar injection for a namespace, you need to label the namespace with `appmesh.k8s.aws/sidecarInjectorWebhook=enabled`
-
-```
-kubectl label namespace appmesh-demo appmesh.k8s.aws/sidecarInjectorWebhook=enabled
-```
-
-### Default behavior and how to override
-
-Sidecars will be injected to all pods in the namespace that has enabled sidecar injector webhook. To override, add 
-`appmesh.k8s.aws/sidecarInjectorWebhook: disabled` annotation to the pod spec. 
-
-All container ports defined in the pod spec will be passed to sidecars as application ports. 
-To override, add `appmesh.k8s.aws/ports: "<ports>"` annotation to the pod spec. 
-
-The name of the controller that eventually creates the pod will be used as virtual node name. For example, if a pod 
-is created by a deployment, the virtual node name will be `<deployment name>-<namespace>`. 
-To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` annotation to the pod spec. 
-
-For example:
-```yaml
-    metadata:
-      labels:
-        app: my-app
-      annotations:
-        appmesh.k8s.aws/ports: "8079,8080"
-        appmesh.k8s.aws/virtualNode: my-app
-        appmesh.k8s.aws/sidecarInjectorWebhook: disabled
 ```
 
 ## Running the Demo
@@ -145,24 +118,35 @@ You can clean up the entire demo by running
 $ make cleandemo
 ```
 
+## Under the hood
+### Enable Sidecar injection
 
-## Running Outside of AWS
-
-The AppMesh containers and the AppMesh Inject Admission Controller are hosted
-on ECR, but are publically available.  To pull the containers outside of AWS
-requires that Kubernetes contain ImagePullSecrets.
-The follow steps requores the awscli.
-For testing purposes you can add ImagePullSecrets by running:
+To enable sidecar injection for a namespace, you need to label the namespace with `appmesh.k8s.aws/sidecarInjectorWebhook=enabled`
 
 ```
-$ make ecrsecrets
+kubectl label namespace appmesh-demo appmesh.k8s.aws/sidecarInjectorWebhook=enabled
 ```
 
-Then you will need to inject the pull secrets for the sidecars, for each
-namespace that will run the AppMesh sidecars.
+### Default behavior and how to override
 
-```
-$ NAMESPACE=my-namespace; make nssecrets
-```
+Sidecars will be injected to all new pods in the namespace that has enabled sidecar injector webhook. To disable injecting the sidecar 
+to particular pods in that namespace, add `appmesh.k8s.aws/sidecarInjectorWebhook: disabled` annotation to the pod spec. 
 
-Replacing "my-namespace" with the namespace you want to add pull secrets to.
+All container ports defined in the pod spec will be passed to sidecars as application ports. 
+To override, add `appmesh.k8s.aws/ports: "<ports>"` annotation to the pod spec. 
+
+The name of the controller that creates the pod will be used as virtual node name and pass over to the sidecar. For example, if a pod 
+is created by a deployment, the virtual node name will be `<deployment name>-<namespace>`. 
+To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` annotation to the pod spec. 
+
+For example:
+```yaml
+kind: Deployment
+spec:
+    metadata:
+      annotations:
+        appmesh.k8s.aws/ports: "8079,8080"
+        appmesh.k8s.aws/virtualNode: my-app
+        appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+```
+See more examples in the [demo](demo) section.

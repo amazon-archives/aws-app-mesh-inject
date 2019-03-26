@@ -44,15 +44,15 @@ pushhash: | hashtag push
 #
 # Appmesh inject deployment
 #
-.PHONY: deployk8s deployk8shash deploy clean
+.PHONY: deploydev deploydevhash deploy clean
 # Uses the image from developer account
-deployk8s:
+deploydev:
 	$(eval export IMAGE_NAME=${REPO}:${IMAGE_TAG})
 	$(eval export MESH_REGION)
 	$(eval export MESH_NAME)
 	./hack/deployInjector.sh
 
-deployk8shash: | hashtag deployk8s
+deploydevhash: | hashtag deploydev
 
 # Uses the official image from EKS account.
 deploy:

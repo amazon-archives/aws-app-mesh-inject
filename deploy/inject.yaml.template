@@ -69,7 +69,7 @@ spec:
               value: {{MESH}}
             - name: APPMESH_LOG_LEVEL
               value: debug
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           resources:
             limits:
               memory: 500Mi

@@ -17,12 +17,12 @@ package main
 
 import (
 	"flag"
+	"github.com/aws/aws-app-mesh-inject/pkg/config"
+	"github.com/aws/aws-app-mesh-inject/pkg/signals"
+	"github.com/aws/aws-app-mesh-inject/pkg/webhook"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/signals"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/webhook"
 	log "github.com/sirupsen/logrus"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"

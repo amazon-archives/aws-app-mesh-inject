@@ -1,4 +1,6 @@
-module github.com/awslabs/aws-app-mesh-inject
+module github.com/aws/aws-app-mesh-inject
+
+go 1.12
 
 require (
 	github.com/aws/aws-sdk-go v1.18.4 // indirect

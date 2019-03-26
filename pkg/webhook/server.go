@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/config"
-	"github.com/awslabs/aws-app-mesh-inject/pkg/patch"
+	"github.com/aws/aws-app-mesh-inject/pkg/config"
+	"github.com/aws/aws-app-mesh-inject/pkg/patch"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"k8s.io/api/admission/v1beta1"
@@ -177,7 +177,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		ports = v
 	} else {
 		// if ports isn't specified in the pod annotation, use the container ports from the pod spec.
-		// https://github.com/awslabs/aws-app-mesh-inject/issues/2
+		// https://github.com/aws/aws-app-mesh-inject/issues/2
 		portArray := getPortsFromContainers(pod.Spec.Containers)
 		if len(portArray) == 0 {
 			log.Info(ErrNoPorts)
@@ -191,7 +191,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		name = v
 	} else {
 		// if virtual router name isn't specified in the pod annotation, use the controller owner name instead.
-		// https://github.com/awslabs/aws-app-mesh-inject/issues/4
+		// https://github.com/aws/aws-app-mesh-inject/issues/4
 		if controllerName := s.getControllerNameForPod(pod, receivedAdmissionReview.Request.Namespace); controllerName != nil {
 			name = fmt.Sprintf("%s-%s", *controllerName, receivedAdmissionReview.Request.Namespace)
 		} else {

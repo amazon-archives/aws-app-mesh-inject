@@ -3,23 +3,17 @@
 The AWS AppMesh Kubernetes sidecar injecting Admission Controller.
 
 ## Running
-To run this sidecar injector or the demo you need both the [aws cli](https://aws.amazon.com/cli/)
+To run this sidecar injector or the demo you need both [jq](https://stedolan.github.io/jq/download/)
  and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
-To deploy the sidecar injector you must have your aws cli configured with the region you will be working in.
-
-To verify please run and verify you are configured for the correct region
+To deploy the sidecar injector you must export the name of your new mesh
 ```
-$ aws configure get region
-```
-Export the name of your new mesh
-```
-$ export MESH=my_mesh_name
+$ export MESH_NAME=my_mesh_name
 ```
 Now you can deploy the appmesh injector
 
 ```bash
-$ make deployk8s
+$ make deploy
 ```
 
 This will bootstrap the required certificates and start the sidecar injector in

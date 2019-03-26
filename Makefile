@@ -1,11 +1,11 @@
 SHELL=/bin/bash -eo pipefail
 .DEFAULT_GOAL := build
-MESH_REGION=$(shell aws configure get region)
-IMAGE_REGION=${MESH_REGION}
+IMAGE_REGION=${shell aws configure get region}
 REPO=${IMAGE_ACCOUNT}.dkr.ecr.${IMAGE_REGION}.amazonaws.com/amazon/aws-app-mesh-inject
 VERSION=$(shell cat VERSION)
 HASH=$(shell git log --pretty=format:'%H' -n 1)
 IMAGE_TAG=${VERSION}
+IMAGE_ACCOUNT=${shell aws sts get-caller-identity --query "Account" --output text}
 
 #
 # Test
@@ -26,11 +26,11 @@ build:
 	docker build --no-cache -t ${REPO}:${IMAGE_TAG} .
 
 push:
-ifeq ($(IMAGE_ACCOUNT),)
-    $(error IMAGE_ACCOUNT is not set)
-endif
-	aws ecr get-login --region ${IMAGE_REGION} --no-include-email | bash
-	docker push ${REPO}:${IMAGE_TAG}
+	$(eval export IMAGE_ACCOUNT)
+	$(eval export IMAGE_REGION)
+	$(eval export REPO)
+	$(eval export IMAGE_TAG)
+	./hack/pushImage.sh
 
 hashtag:
 	$(eval export IMAGE_TAG=${HASH})
@@ -44,27 +44,29 @@ pushhash: | hashtag push
 #
 # Appmesh inject deployment
 #
-.PHONY: deployk8s deployk8shash clean
+.PHONY: deployk8s deployk8shash deploy clean
+# Uses the image from developer account
 deployk8s:
-ifeq ($(MESH),)
-    $(error MESH is not set)
-else ifeq ($(IMAGE_ACCOUNT),)
-    $(error IMAGE_ACCOUNT is not set)
-endif
 	$(eval export IMAGE_ACCOUNT)
 	$(eval export IMAGE_TAG)
 	$(eval export IMAGE_REGION)
 	$(eval export MESH_REGION)
-	$(eval export MESH)
-	kubectl apply -f deploy/inject-ns.yaml
-	./hack/gen-cert.sh
-	./hack/ca-bundle.sh
-	kubectl apply -f _output/inject.yaml
+	$(eval export MESH_NAME)
+	./hack/deployInjector.sh
 
 deployk8shash: | hashtag deployk8s
 
+# Uses the official image from EKS account.
+deploy:
+	$(eval export IMAGE_ACCOUNT=705114051414)
+	$(eval export IMAGE_TAG=0.1.0-beta)
+	$(eval export IMAGE_REGION=us-west-2)
+	$(eval export MESH_REGION)
+	$(eval export MESH_NAME)
+	./hack/deployInjector.sh
+
 clean:
-	kubectl delete -f _output/inject.yaml
+	kubectl delete namespace appmesh-inject
 	rm -rf ./_output
 
 #
@@ -80,7 +82,7 @@ cleank8sdemo:
 	kubectl delete -f demo/ns.yaml
 
 appmeshdemo:
-	$(eval export MESH)
+	$(eval export MESH_NAME)
 	cd demo/appmesh/ && \
 	./deployappmesh.sh
 
@@ -89,7 +91,7 @@ updatecolors:
 	./updatecolors.sh
 
 cleandemo:
-	$(eval export MESH)
+	$(eval export MESH_NAME)
 	kubectl delete -f demo/ns.yaml
 	./demo/appmesh/cleanappmesh.sh
 

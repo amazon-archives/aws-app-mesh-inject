@@ -47,9 +47,7 @@ pushhash: | hashtag push
 .PHONY: deployk8s deployk8shash deploy clean
 # Uses the image from developer account
 deployk8s:
-	$(eval export IMAGE_ACCOUNT)
-	$(eval export IMAGE_TAG)
-	$(eval export IMAGE_REGION)
+	$(eval export IMAGE_NAME=${REPO}:${IMAGE_TAG})
 	$(eval export MESH_REGION)
 	$(eval export MESH_NAME)
 	./hack/deployInjector.sh
@@ -58,9 +56,7 @@ deployk8shash: | hashtag deployk8s
 
 # Uses the official image from EKS account.
 deploy:
-	$(eval export IMAGE_ACCOUNT=705114051414)
-	$(eval export IMAGE_TAG=0.1.0-beta)
-	$(eval export IMAGE_REGION=us-west-2)
+	$(eval export IMAGE_NAME=705114051414.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:0.1.0-beta)
 	$(eval export MESH_REGION)
 	$(eval export MESH_NAME)
 	./hack/deployInjector.sh

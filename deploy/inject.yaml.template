@@ -61,12 +61,12 @@ spec:
       serviceAccountName: aws-app-mesh-inject-sa
       containers:
         - name: webhook
-          image: {{IMAGE_ACCOUNT}}.dkr.ecr.{{IMAGE_REGION}}.amazonaws.com/amazon/aws-app-mesh-inject:{{IMAGE_TAG}}
+          image: ${IMAGE_NAME}
           env:
             - name: APPMESH_REGION
-              value: {{MESH_REGION}}
+              value: ${MESH_REGION}
             - name: APPMESH_NAME
-              value: {{MESH}}
+              value: ${MESH_NAME}
             - name: APPMESH_LOG_LEVEL
               value: debug
           imagePullPolicy: Always
@@ -113,7 +113,7 @@ webhooks:
         name: aws-app-mesh-inject
         namespace: appmesh-inject
         path: "/"
-      caBundle: "{{CA_BUNDLE}}"
+      caBundle: "${CA_BUNDLE}"
     rules:
       - operations: ["CREATE","UPDATE"]
         apiGroups: [""]

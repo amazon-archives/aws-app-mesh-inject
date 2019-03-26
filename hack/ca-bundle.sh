@@ -12,14 +12,11 @@ if [[ -z $CA_BUNDLE ]]; then
 fi
 
 mkdir -p _output/
-sed \
-    -e "s/{{IMAGE_ACCOUNT}}/${IMAGE_ACCOUNT}/g" \
-    -e "s/{{IMAGE_REGION}}/${IMAGE_REGION}/g" \
-    -e "s/{{IMAGE_TAG}}/${IMAGE_TAG}/g" \
-    -e "s/{{MESH_REGION}}/${MESH_REGION}/g" \
-    -e "s/{{MESH}}/${MESH_NAME}/g" \
-    -e "s/{{CA_BUNDLE}}/${CA_BUNDLE}/g" \
-    ${ROOT}/deploy/inject.yaml.template \
-    > ${ROOT}/_output/inject.yaml
+
+echo "processing templates"
+eval "cat <<EOF
+$(<${ROOT}/deploy/inject.yaml.template)
+EOF
+" > ${ROOT}/_output/inject.yaml
 
 echo "Created injector manifest at:${ROOT}/_output/inject.yaml"

@@ -1,6 +1,6 @@
-# AppMesh Inject
+# App Mesh Inject
 
-The AWS AppMesh Kubernetes sidecar injecting Admission Controller.
+The AWS App Mesh Kubernetes sidecar injecting Admission Controller.
 
 ## Running
 To run this sidecar injector or the demo you need both [jq](https://stedolan.github.io/jq/download/)
@@ -148,7 +148,7 @@ $ make cleandemo
 
 ## Running Outside of AWS
 
-The AppMesh containers and the AppMesh Inject Admission Controller are hosted
+The App Mesh containers and the App Mesh Inject Admission Controller are hosted
 on ECR, but are publically available.  To pull the containers outside of AWS
 requires that Kubernetes contain ImagePullSecrets.
 The follow steps requores the awscli.

@@ -1,6 +1,6 @@
-# AppMesh Inject
+# App Mesh Inject
 
-The AWS AppMesh Kubernetes sidecar injecting Admission Controller.
+The AWS App Mesh Kubernetes sidecar injecting Admission Controller.
 
 
 ## Prerequisites

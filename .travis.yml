@@ -10,6 +10,6 @@ env:
   - GO111MODULE=on
 script: 
   - make test
-  - make build
+  - docker build -t aws-app-mesh-inject .
 after_success:
   - test -n "$TRAVIS_TAG" && make push

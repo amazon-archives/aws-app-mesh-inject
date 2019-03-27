@@ -1,7 +1,8 @@
 # App Mesh Inject
 
-The AWS App Mesh Kubernetes sidecar injecting Admission Controller.
+[![Build Status](https://travis-ci.org/aws/aws-app-mesh-inject.svg?branch=master)](https://travis-ci.org/aws/aws-app-mesh-inject)
 
+The AWS App Mesh Kubernetes sidecar injecting Admission Controller.
 
 ## Prerequisites
 * [openssl](https://www.openssl.org/source/)

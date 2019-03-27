@@ -56,7 +56,7 @@ deploydevhash: | hashtag deploydev
 
 # Uses the official image from EKS account.
 deploy:
-	$(eval export IMAGE_NAME=602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v1.0.0)
+	$(eval export IMAGE_NAME=602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.0)
 	$(eval export MESH_REGION)
 	$(eval export MESH_NAME)
 	./hack/deployInjector.sh

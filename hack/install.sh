@@ -34,7 +34,7 @@ curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/hack/ca-bu
 
 chmod u+x ./hack/ca-bundle.sh ./hack/gen-cert.sh
 
-export IMAGE_NAME=602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v1.0.0
+export IMAGE_NAME=602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.0
 export MESH_REGION=""
 
 curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/hack/deployInjector.sh | bash

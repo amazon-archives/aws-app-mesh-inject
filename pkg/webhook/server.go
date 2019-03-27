@@ -27,6 +27,7 @@ var (
 	ErrNoPorts                = errors.New("No ports specified for injection, doing nothing")
 	ErrNoName                 = errors.New("No VirtualNode name specified for injection, doing nothing")
 	ErrNoObject               = errors.New("No Object passed to mutate")
+	meshNameAnnotation        = "appmesh.k8s.aws/mesh"
 	portsAnnotation           = "appmesh.k8s.aws/ports"
 	virtualNodeNameAnnotation = "appmesh.k8s.aws/virtualNode"
 	sidecarInjectAnnotation   = "appmesh.k8s.aws/sidecarInjectorWebhook"
@@ -172,6 +173,12 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		return &admissionResponse
 	}
 
+	// set mesh name
+	meshName := s.Config.MeshName
+	if v, ok := pod.ObjectMeta.Annotations[meshNameAnnotation]; ok {
+		meshName = v
+	}
+
 	// set ports
 	if v, ok := pod.ObjectMeta.Annotations[portsAnnotation]; ok {
 		ports = v
@@ -218,7 +225,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			ContainerImage:  s.Config.SidecarImage,
 			LogLevel:        s.Config.LogLevel,
 			Region:          s.Config.Region,
-			MeshName:        s.Config.MeshName,
+			MeshName:        meshName,
 			MemoryRequests:  s.Config.SidecarMemory,
 			CpuRequests:     s.Config.SidecarCpu,
 		},

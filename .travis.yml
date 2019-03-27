@@ -8,12 +8,8 @@ notifications:
   email: false
 env:
   - GO111MODULE=on
-  - TEST_SUITE=goveralls
-  - TEST_SUITE=buildpushhash
-before_install:
-  - go get github.com/mattn/goveralls
 script: 
-  - make goveralls
+  - make test
   - make build
 after_success:
-  - test -n "$TRAVIS_TAG" && make build && make push 
+  - test -n "$TRAVIS_TAG" && make push

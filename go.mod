@@ -3,7 +3,7 @@ module github.com/aws/aws-app-mesh-inject
 go 1.12
 
 require (
-	github.com/aws/aws-sdk-go v1.18.4 // indirect
+	github.com/aws/aws-sdk-go v1.18.4
 	github.com/davecgh/go-spew v1.1.1
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
 	github.com/gogo/protobuf v0.0.0-20171007142547-342cbe0a0415

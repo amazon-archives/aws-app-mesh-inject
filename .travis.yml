@@ -9,7 +9,6 @@ notifications:
 env:
   - GO111MODULE=on
 script: 
-  - make test
-  - docker build -t aws-app-mesh-inject .
+  - make ci-test-build
 after_success:
-  - test -n "$TRAVIS_TAG" && make push
+  - test -n "$TRAVIS_TAG" && make build && make push

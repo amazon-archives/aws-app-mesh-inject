@@ -63,6 +63,9 @@ deploy:
 
 clean:
 	kubectl delete namespace appmesh-inject
+	kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject
+	kubectl delete clusterrolebindings aws-app-mesh-inject-binding
+	kubectl delete clusterrole aws-app-mesh-inject-cr;
 	rm -rf ./_output
 
 #

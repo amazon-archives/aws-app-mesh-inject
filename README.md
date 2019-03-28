@@ -37,7 +37,8 @@ curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/hack/insta
 
 To cleanup you can run
 ```
-$ kubectl delete namespace appmesh-inject
+kubectl delete namespace appmesh-inject; kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject; 
+kubectl delete clusterrolebindings aws-app-mesh-inject-binding; kubectl delete clusterrole aws-app-mesh-inject-cr;
 ```
 
 ## Running the Demo

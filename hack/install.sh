@@ -37,4 +37,7 @@ chmod u+x ./hack/ca-bundle.sh ./hack/gen-cert.sh
 export IMAGE_NAME=602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.0
 export MESH_REGION=""
 
+export SIDECAR_IMAGE=111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.9.0.0-prod
+export INIT_IMAGE=111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:latest
+
 curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.0/hack/deployInjector.sh | bash

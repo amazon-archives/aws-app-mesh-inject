@@ -1,5 +1,5 @@
 language: go
-go: 1.10.x
+go: 1.12.x
 sudo: true
 services:
 - docker
@@ -7,11 +7,8 @@ install: true
 notifications:
   email: false
 env:
-  - TEST_SUITE=goveralls
-  - TEST_SUITE=buildpushhash
-before_install:
-  - go get github.com/mattn/goveralls
+  - GO111MODULE=on
 script: 
-  - "make $TEST_SUITE"
+  - make ci-test-build
 after_success:
-  - test -n "$TRAVIS_TAG" && make build && make push 
+  - test -n "$TRAVIS_TAG" && make build && make push

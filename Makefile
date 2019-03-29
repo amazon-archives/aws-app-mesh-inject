@@ -41,6 +41,10 @@ buildhash: | hashtag build
 
 pushhash: | hashtag push
 
+ci-test-build:
+	go test ./...
+	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o appmeshinject ./cmd/app-mesh-inject/*.go
+
 #
 # Appmesh inject deployment
 #

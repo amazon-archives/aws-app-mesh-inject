@@ -70,6 +70,10 @@ spec:
             - name: APPMESH_LOG_LEVEL
               value: debug
           imagePullPolicy: Always
+          command:
+            - ./appmeshinject
+            - -sidecar-image=${SIDECAR_IMAGE}
+            - -init-image=${INIT_IMAGE}
           resources:
             limits:
               memory: 500Mi

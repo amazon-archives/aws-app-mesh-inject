@@ -1,6 +1,9 @@
 package patch
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	ecrSecret = `{"name": "appmesh-ecr-secret"}`
@@ -31,17 +34,25 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		initPatch = fmt.Sprintf(create, "initContainers", initPatch)
 	}
 
-	sidecarPatch, err := renderSidecar(meta.Sidecar)
+	var sidecarPatches []string
+	sidecars, err := renderSidecars(meta.Sidecar)
 	if err != nil {
 		return []byte(patch), err
 	}
 
 	if meta.AppendSidecar {
-		sidecarPatch = fmt.Sprintf(add, "containers", sidecarPatch)
+		//will generate values of the form [{"op":"add","path":"/spec/containers/-", {...}},...]
+		for i := range sidecars {
+			sidecarPatches = append(sidecarPatches, fmt.Sprintf(add, "containers", sidecars[i]))
+		}
 	} else {
-		sidecarPatch = fmt.Sprintf(create, "containers", sidecarPatch)
+		//will generate values of the form {"op":"add","path":"/spec/containers", [{...},{...}]}
+		sidecarPatches = append(sidecarPatches, fmt.Sprintf(create, "containers", strings.Join(sidecars, ",")))
 	}
 
+	var patches []string
+	patches = append(patches, initPatch)
+	patches = append(patches, sidecarPatches...)
 	if meta.HasImagePullSecret {
 		var ecrPatch string
 		if meta.AppendImagePullSecret {
@@ -49,10 +60,8 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		} else {
 			ecrPatch = fmt.Sprintf(create, "imagePullSecrets", ecrSecret)
 		}
-		patch = fmt.Sprintf("[%v,%v,%v]", initPatch, sidecarPatch, ecrPatch)
-	} else {
-		patch = fmt.Sprintf("[%v,%v]", initPatch, sidecarPatch)
+		patches = append(patches, ecrPatch)
 	}
 
-	return []byte(patch), nil
+	return []byte(fmt.Sprintf("[%s]", strings.Join(patches, ","))), nil
 }

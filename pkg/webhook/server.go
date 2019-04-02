@@ -6,9 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-app-mesh-inject/pkg/config"
 	"github.com/aws/aws-app-mesh-inject/pkg/patch"
-	"io/ioutil"
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,10 +21,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/pkg/apis/apps"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -221,13 +222,15 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			IgnoredIPs:     s.Config.IgnoredIPs,
 		},
 		Sidecar: patch.SidecarMeta{
-			VirtualNodeName: name,
-			ContainerImage:  s.Config.SidecarImage,
-			LogLevel:        s.Config.LogLevel,
-			Region:          s.Config.Region,
-			MeshName:        meshName,
-			MemoryRequests:  s.Config.SidecarMemory,
-			CpuRequests:     s.Config.SidecarCpu,
+			VirtualNodeName:   name,
+			ContainerImage:    s.Config.SidecarImage,
+			LogLevel:          s.Config.LogLevel,
+			Region:            s.Config.Region,
+			MeshName:          meshName,
+			MemoryRequests:    s.Config.SidecarMemory,
+			CpuRequests:       s.Config.SidecarCpu,
+			InjectXraySidecar: s.Config.InjectXraySidecar,
+			EnableStatsTags:   s.Config.EnableStatsTags,
 		},
 	})
 	if err != nil {

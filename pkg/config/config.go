@@ -18,4 +18,8 @@ type Config struct {
 	// Init container settings
 	InitImage  string
 	IgnoredIPs string
+
+	// Observability settings
+	InjectXraySidecar bool
+	EnableStatsTags   bool
 }

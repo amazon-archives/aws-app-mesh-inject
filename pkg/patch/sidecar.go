@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-const sidecarContainerTemplate = `
+const envoyContainerTemplate = `
 {
   "name": "envoy",
   "image": "{{ .ContainerImage }}",
@@ -32,6 +32,36 @@ const sidecarContainerTemplate = `
     {
       "name": "AWS_REGION",
       "value": "{{ .Region }}"
+    }{{ if .InjectXraySidecar }},
+    {
+      "name": "ENABLE_ENVOY_XRAY_TRACING",
+      "value": "1"
+    }{{ end }}{{ if .EnableStatsTags }},
+    {
+      "name": "ENABLE_ENVOY_STATS_TAGS",
+      "value": "1"
+    }{{ end }}
+  ],
+  "resources": {
+    "requests": {
+      "cpu": "{{ .CpuRequests }}",
+      "memory": "{{ .MemoryRequests }}"
+    }
+  }
+}
+`
+const xrayDaemonContainerTemplate = `
+{
+  "name": "xray-daemon",
+  "image": "amazon/aws-xray-daemon",
+  "securityContext": {
+    "runAsUser": 1337
+  },
+  "ports": [
+    {
+      "containerPort": 2000,
+      "name": "xray",
+      "protocol": "UDP"
     }
   ],
   "resources": {
@@ -44,17 +74,41 @@ const sidecarContainerTemplate = `
 `
 
 type SidecarMeta struct {
-	ContainerImage  string
-	MeshName        string
-	VirtualNodeName string
-	LogLevel        string
-	Region          string
-	CpuRequests     string
-	MemoryRequests  string
+	ContainerImage    string
+	MeshName          string
+	VirtualNodeName   string
+	LogLevel          string
+	Region            string
+	CpuRequests       string
+	MemoryRequests    string
+	InjectXraySidecar bool
+	EnableStatsTags   bool
 }
 
-func renderSidecar(meta SidecarMeta) (string, error) {
-	tmpl, err := template.New("sidecar").Parse(sidecarContainerTemplate)
+func renderSidecars(meta SidecarMeta) ([]string, error) {
+	var sidecars []string
+
+	envoySidecar, err := renderTemplate("envoy", envoyContainerTemplate, meta)
+	if err != nil {
+		return sidecars, err
+	}
+
+	sidecars = append(sidecars, envoySidecar)
+
+	if meta.InjectXraySidecar {
+		xrayDaemonSidecar, err := renderTemplate("xray-daemon", xrayDaemonContainerTemplate, meta)
+		if err != nil {
+			return sidecars, err
+		}
+
+		sidecars = append(sidecars, xrayDaemonSidecar)
+	}
+
+	return sidecars, nil
+}
+
+func renderTemplate(name string, t string, meta SidecarMeta) (string, error) {
+	tmpl, err := template.New(name).Parse(t)
 	if err != nil {
 		return "", err
 	}

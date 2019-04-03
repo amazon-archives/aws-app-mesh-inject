@@ -74,6 +74,8 @@ spec:
             - ./appmeshinject
             - -sidecar-image=${SIDECAR_IMAGE}
             - -init-image=${INIT_IMAGE}
+            - -inject-xray-sidecar=${INJECT_XRAY_SIDECAR:-false}
+            - -enable-stats-tags=${ENABLE_STATS_TAGS:-false}
           resources:
             limits:
               memory: 500Mi

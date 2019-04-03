@@ -15,6 +15,17 @@ To deploy the sidecar injector you must export the name of your new mesh
 ```
 $ export MESH_NAME=my_mesh_name
 ```
+
+(Optional) To enable stats_tags on sidecar (Envoy) use
+```
+$ export ENABLE_STATS_TAGS=true
+```
+
+(Optional) To enable the xray-daemon sidecar injection use
+```
+$ export INJECT_XRAY_SIDECAR=true
+```
+
 Now you can deploy the appmesh injector
 
 ### Option 1: clone the repository (You can also run the demo)

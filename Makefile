@@ -52,7 +52,6 @@ ci-test-build:
 # Uses the image from developer account
 deploydev:
 	$(eval export IMAGE_NAME=${REPO}:${IMAGE_TAG})
-	$(eval export MESH_REGION)
 	$(eval export MESH_NAME)
 	./hack/deployInjector.sh
 
@@ -60,8 +59,6 @@ deploydevhash: | hashtag deploydev
 
 # Uses the official image from EKS account.
 deploy:
-	$(eval export IMAGE_NAME=602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.0)
-	$(eval export MESH_REGION)
 	$(eval export MESH_NAME)
 	./hack/deployInjector.sh
 

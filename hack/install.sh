@@ -34,17 +34,4 @@ curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.0/hack/ca-bu
 
 chmod u+x ./hack/ca-bundle.sh ./hack/gen-cert.sh
 
-export IMAGE_NAME=602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.0
-export MESH_REGION=""
-
-# Change this to true if you want to inject xray-daemon as sidecar
-export INJECT_XRAY_SIDECAR="false"
-
-# Change this to true if you want to sidecar (envoy) to enable stats_tags
-# https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/metrics/v2/stats.proto#config-metrics-v2-statsconfig
-export ENABLE_STATS_TAGS="false"
-
-export SIDECAR_IMAGE=111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.9.0.0-prod
-export INIT_IMAGE=111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:latest
-
 curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.0/hack/deployInjector.sh | bash

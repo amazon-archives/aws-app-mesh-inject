@@ -28,7 +28,7 @@ $ export INJECT_XRAY_SIDECAR=true
 
 Now you can deploy the appmesh injector
 
-### Option 1: clone the repository (You can also run the demo)
+### Option 1: clone the repository
 
 ```bash
 $ make deploy

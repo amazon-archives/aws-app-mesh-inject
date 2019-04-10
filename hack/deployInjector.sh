@@ -34,12 +34,4 @@ else
     exit 1
 fi
 
-ACTUAL_APPMESH_IMAGE=$(kubectl get deployment aws-app-mesh-inject -n appmesh-inject -o=jsonpath="{.spec.template.spec.containers[0].image}")
-if [[ "$ACTUAL_APPMESH_IMAGE" = "$IMAGE_NAME" ]]; then
-    echo "App Mesh image has been set up"
-else
-    echo "App Mesh image is unexpected. Expect:${IMAGE_NAME}, Actual:${ACTUAL_APPMESH_IMAGE}"
-    exit 1
-fi
-
 echo "The injector is ready"

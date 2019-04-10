@@ -25,13 +25,13 @@ echo "\nWorking directory at ${tmpdir}\n"
 cd $tmpdir
 
 mkdir -p deploy
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.2/deploy/inject-ns.yaml > deploy/inject-ns.yaml
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.2/deploy/inject.yaml.template > deploy/inject.yaml.template
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.3/deploy/inject-ns.yaml > deploy/inject-ns.yaml
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.3/deploy/inject.yaml.template > deploy/inject.yaml.template
 
 mkdir -p hack
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.2/hack/gen-cert.sh > hack/gen-cert.sh
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.2/hack/ca-bundle.sh > hack/ca-bundle.sh
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.3/hack/gen-cert.sh > hack/gen-cert.sh
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.3/hack/ca-bundle.sh > hack/ca-bundle.sh
 
 chmod u+x ./hack/ca-bundle.sh ./hack/gen-cert.sh
 
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.2/hack/deployInjector.sh | bash
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.3/hack/deployInjector.sh | bash

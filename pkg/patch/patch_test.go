@@ -13,7 +13,7 @@ func TestGeneratePatch_AppendSidecarFalse(t *testing.T) {
 		AppendInit:            false,
 		Init: InitMeta{
 			Ports:          "80,443",
-			ContainerImage: "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:latest",
+			ContainerImage: "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2",
 			IgnoredIPs:     "169.254.169.254",
 		},
 		Sidecar: SidecarMeta{
@@ -45,7 +45,7 @@ func TestGeneratePatch_AppendSidecarTrue(t *testing.T) {
 		AppendInit:            false,
 		Init: InitMeta{
 			Ports:          "80,443",
-			ContainerImage: "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:latest",
+			ContainerImage: "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2",
 			IgnoredIPs:     "169.254.169.254",
 		},
 		Sidecar: SidecarMeta{
@@ -70,7 +70,7 @@ func TestGeneratePatch_AppendSidecarTrue(t *testing.T) {
 }
 
 func verifyPatch(t *testing.T, patch string, meta Meta) {
-	if !strings.Contains(patch, "aws-appmesh-proxy-route-manager:latest") {
+	if !strings.Contains(patch, "aws-appmesh-proxy-route-manager:v2") {
 		t.Errorf("Init container image not found")
 	}
 

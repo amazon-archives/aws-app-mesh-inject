@@ -76,6 +76,8 @@ spec:
             - -init-image=${INIT_IMAGE:-111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2}
             - -inject-xray-sidecar=${INJECT_XRAY_SIDECAR:-false}
             - -enable-stats-tags=${ENABLE_STATS_TAGS:-false}
+            - -enable-statsd=${ENABLE_STATSD:-""}
+            - -inject-statsd-exporter-sidecar=${INJECT_STATSD_EXPORTER_SIDECAR:-false}
           resources:
             limits:
               memory: 500Mi

@@ -20,6 +20,8 @@ type Config struct {
 	IgnoredIPs string
 
 	// Observability settings
-	InjectXraySidecar bool
-	EnableStatsTags   bool
+	InjectXraySidecar           bool
+	EnableStatsTags             bool
+	EnableStatsD                bool
+	InjectStatsDExporterSidecar bool
 }

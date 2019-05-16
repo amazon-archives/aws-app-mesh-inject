@@ -4,6 +4,10 @@
 
 The AWS App Mesh Kubernetes sidecar injecting Admission Controller.
 
+## Security disclosures
+
+If you think you’ve found a potential security issue, please do not post it in the Issues.  Instead, please follow the instructions [here](https://aws.amazon.com/security/vulnerability-reporting/) or [email AWS security directly](mailto:aws-security@amazon.com).
+
 ## Prerequisites
 * [openssl](https://www.openssl.org/source/)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)

@@ -30,7 +30,7 @@ push:
 	$(eval export IMAGE_REGION)
 	$(eval export REPO)
 	$(eval export IMAGE_TAG)
-	./hack/pushImage.sh
+	./scripts/pushImage.sh
 
 hashtag:
 	$(eval export IMAGE_TAG=${HASH})
@@ -53,14 +53,14 @@ ci-test-build:
 deploydev:
 	$(eval export IMAGE_NAME=${REPO}:${IMAGE_TAG})
 	$(eval export MESH_NAME)
-	./hack/deployInjector.sh
+	./scripts/deployInjector.sh
 
 deploydevhash: | hashtag deploydev
 
 # Uses the official image from EKS account.
 deploy:
 	$(eval export MESH_NAME)
-	./hack/deployInjector.sh
+	./scripts/deployInjector.sh
 
 clean:
 	kubectl delete namespace appmesh-inject

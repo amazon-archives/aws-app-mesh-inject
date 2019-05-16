@@ -48,12 +48,12 @@ $ make clean
 
 ### Option 2: download and execute the install script
 ```bash
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/hack/install.sh | bash
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/scripts/install.sh | bash
 ```
 
 To cleanup you can run
 ```
-kubectl delete namespace appmesh-inject; kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject; 
+kubectl delete namespace appmesh-inject; kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject;
 kubectl delete clusterrolebindings aws-app-mesh-inject-binding; kubectl delete clusterrole aws-app-mesh-inject-cr;
 ```
 
@@ -69,15 +69,15 @@ kubectl label namespace appmesh-demo appmesh.k8s.aws/sidecarInjectorWebhook=enab
 
 ### Default behavior and how to override
 
-Sidecars will be injected to all new pods in the namespace that has enabled sidecar injector webhook. To disable injecting the sidecar 
-to particular pods in that namespace, add `appmesh.k8s.aws/sidecarInjectorWebhook: disabled` annotation to the pod spec. 
+Sidecars will be injected to all new pods in the namespace that has enabled sidecar injector webhook. To disable injecting the sidecar
+to particular pods in that namespace, add `appmesh.k8s.aws/sidecarInjectorWebhook: disabled` annotation to the pod spec.
 
-All container ports defined in the pod spec will be passed to sidecars as application ports. 
-To override, add `appmesh.k8s.aws/ports: "<ports>"` annotation to the pod spec. 
+All container ports defined in the pod spec will be passed to sidecars as application ports.
+To override, add `appmesh.k8s.aws/ports: "<ports>"` annotation to the pod spec.
 
-The name of the controller that creates the pod will be used as virtual node name and pass over to the sidecar. For example, if a pod 
-is created by a deployment, the virtual node name will be `<deployment name>-<namespace>`. 
-To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` annotation to the pod spec. 
+The name of the controller that creates the pod will be used as virtual node name and pass over to the sidecar. For example, if a pod
+is created by a deployment, the virtual node name will be `<deployment name>-<namespace>`.
+To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` annotation to the pod spec.
 
 The mesh name provided at install time can be overridden with the `appmesh.k8s.aws/mesh: <mesh name>` annotation.
 

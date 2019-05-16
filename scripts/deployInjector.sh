@@ -20,8 +20,8 @@ if ! command -v kubectl >/dev/null 2>&1; then
 fi
 
 kubectl apply -f deploy/inject-ns.yaml
-./hack/gen-cert.sh
-./hack/ca-bundle.sh
+./scripts/gen-cert.sh
+./scripts/ca-bundle.sh
 kubectl apply -f _output/inject.yaml
 echo "waiting for aws-app-mesh-inject to start"
 kubectl rollout status deployment/aws-app-mesh-inject -n appmesh-inject

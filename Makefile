@@ -23,7 +23,7 @@ goveralls:
 #
 .PHONY: build push hashtag buildpushhash buildhash pushhash
 build:
-	docker build --no-cache -t ${REPO}:${IMAGE_TAG} .
+	docker build -t ${REPO}:${IMAGE_TAG} .
 
 push:
 	$(eval export IMAGE_ACCOUNT)

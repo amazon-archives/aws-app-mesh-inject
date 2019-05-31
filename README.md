@@ -93,12 +93,17 @@ The name of the controller that creates the pod will be used as virtual node nam
 is created by a deployment, the virtual node name will be `<deployment name>-<namespace>`.
 To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` annotation to the pod spec.
 
-The mesh name provided at install time can be overridden with the `appmesh.k8s.aws/mesh: <mesh name>` annotation.
+The mesh name provided at install time can be overridden with the `appmesh.k8s.aws/mesh: <mesh name>` annotation at POD spec level.
 
 For example:
 ```yaml
+apiVersion: appsv1
 kind: Deployment
+metadata:
+  labels:
+    name: my-cool-deployment
 spec:
+  template:
     metadata:
       annotations:
         appmesh.k8s.aws/mesh: my-mesh

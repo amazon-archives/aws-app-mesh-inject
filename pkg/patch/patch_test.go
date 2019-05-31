@@ -12,9 +12,10 @@ func TestGeneratePatch_AppendSidecarFalse(t *testing.T) {
 		AppendSidecar:         false,
 		AppendInit:            false,
 		Init: InitMeta{
-			Ports:          "80,443",
-			ContainerImage: "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2",
-			IgnoredIPs:     "169.254.169.254",
+			Ports:              "80,443",
+			EgressIgnoredPorts: "22",
+			ContainerImage:     "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2",
+			IgnoredIPs:         "169.254.169.254",
 		},
 		Sidecar: SidecarMeta{
 			MeshName:          "global",
@@ -44,9 +45,10 @@ func TestGeneratePatch_AppendSidecarTrue(t *testing.T) {
 		AppendSidecar:         true,
 		AppendInit:            false,
 		Init: InitMeta{
-			Ports:          "80,443",
-			ContainerImage: "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2",
-			IgnoredIPs:     "169.254.169.254",
+			Ports:              "80,443",
+			EgressIgnoredPorts: "22",
+			ContainerImage:     "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2",
+			IgnoredIPs:         "169.254.169.254",
 		},
 		Sidecar: SidecarMeta{
 			MeshName:          "global",

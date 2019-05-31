@@ -25,12 +25,12 @@ $ export MESH_NAME=my_mesh_name
 $ export ENABLE_STATS_TAGS=true
 ```
 
-(Optional) If enabled, Envoy will emit DogStatsD metrics to 127.0.0.1:8125, where it expects to find a statsd receiver. This could be either a Datadog sidecar, or something like [statsd_exporter](https://github.com/prometheus/statsd_exporter) (see below). 
+(Optional) If enabled, Envoy will emit DogStatsD metrics to 127.0.0.1:8125, where it expects to find a statsd receiver. This could be either a Datadog sidecar, or something like [statsd_exporter](https://github.com/prometheus/statsd_exporter) (see below).
 ```
 $ export ENABLE_STATSD=true
 ```
 
-(Optional) To deploy [statsd_exporter](https://github.com/prometheus/statsd_exporter) as a sidecar, which can recieve statsd metrics and republish them in Prometheus format. It listens for metrics on 127.0.0.1:8125, and exposes a prometheus endpoint at 127.0.0.1:9201. This is useful as statsd provides metrics around request latency (p50, p99 etc), whereas the standard Envoy prometheus endpoint does not. 
+(Optional) To deploy [statsd_exporter](https://github.com/prometheus/statsd_exporter) as a sidecar, which can recieve statsd metrics and republish them in Prometheus format. It listens for metrics on 127.0.0.1:8125, and exposes a prometheus endpoint at 127.0.0.1:9201. This is useful as statsd provides metrics around request latency (p50, p99 etc), whereas the standard Envoy prometheus endpoint does not.
 ```
 $ export INJECT_STATSD_EXPORTER_SIDECAR=true
 ```
@@ -86,6 +86,9 @@ to particular pods in that namespace, add `appmesh.k8s.aws/sidecarInjectorWebhoo
 All container ports defined in the pod spec will be passed to sidecars as application ports.
 To override, add `appmesh.k8s.aws/ports: "<ports>"` annotation to the pod spec.
 
+By default all egress traffic ports will be routed, except SSH.
+To override, add `appmesh.k8s.aws/egressIgnoredPorts: "<ports>"` annotation to the pod spec. ( Comma separated list of ports for which egress traffic will be ignored )
+
 The name of the controller that creates the pod will be used as virtual node name and pass over to the sidecar. For example, if a pod
 is created by a deployment, the virtual node name will be `<deployment name>-<namespace>`.
 To override, add `appmesh.k8s.aws/virtualNode: <virtual node name>` annotation to the pod spec.
@@ -100,6 +103,7 @@ spec:
       annotations:
         appmesh.k8s.aws/mesh: my-mesh
         appmesh.k8s.aws/ports: "8079,8080"
+        appmesh.k8s.aws/egressIgnoredPorts: "22"
         appmesh.k8s.aws/virtualNode: my-app
         appmesh.k8s.aws/sidecarInjectorWebhook: disabled
 ```

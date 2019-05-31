@@ -2,6 +2,11 @@ package webhook
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/aws/aws-app-mesh-inject/pkg/config"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -9,10 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/fake"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 const admissionReview = `
@@ -50,6 +51,7 @@ const admissionReview = `
         },
         "annotations": {
           "appmesh.k8s.aws/ports": "9898",
+          "appmesh.k8s.aws/egress_ignored_ports": "22",
           "appmesh.k8s.aws/virtualNode": "podinfo"
         }
       },

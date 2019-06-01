@@ -24,14 +24,15 @@ import (
 )
 
 var (
-	ErrNoUID                  = errors.New("No UID from request")
-	ErrNoPorts                = errors.New("No ports specified for injection, doing nothing")
-	ErrNoName                 = errors.New("No VirtualNode name specified for injection, doing nothing")
-	ErrNoObject               = errors.New("No Object passed to mutate")
-	meshNameAnnotation        = "appmesh.k8s.aws/mesh"
-	portsAnnotation           = "appmesh.k8s.aws/ports"
-	virtualNodeNameAnnotation = "appmesh.k8s.aws/virtualNode"
-	sidecarInjectAnnotation   = "appmesh.k8s.aws/sidecarInjectorWebhook"
+	ErrNoUID                     = errors.New("No UID from request")
+	ErrNoPorts                   = errors.New("No ports specified for injection, doing nothing")
+	ErrNoName                    = errors.New("No VirtualNode name specified for injection, doing nothing")
+	ErrNoObject                  = errors.New("No Object passed to mutate")
+	meshNameAnnotation           = "appmesh.k8s.aws/mesh"
+	portsAnnotation              = "appmesh.k8s.aws/ports"
+	egressIgnoredPortsAnnotation = "appmesh.k8s.aws/egressIgnoredPorts"
+	virtualNodeNameAnnotation    = "appmesh.k8s.aws/virtualNode"
+	sidecarInjectAnnotation      = "appmesh.k8s.aws/sidecarInjectorWebhook"
 )
 
 type Server struct {
@@ -156,6 +157,7 @@ func (s *Server) injectHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 	var ports string
+	var egressIgnoredPorts string
 	var name string
 	admissionResponse := v1beta1.AdmissionResponse{
 		Allowed: true,
@@ -178,6 +180,13 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 	meshName := s.Config.MeshName
 	if v, ok := pod.ObjectMeta.Annotations[meshNameAnnotation]; ok {
 		meshName = v
+	}
+
+	// set egress ignored ports
+	if v, ok := pod.ObjectMeta.Annotations[egressIgnoredPortsAnnotation]; ok {
+		egressIgnoredPorts = v
+	} else {
+		egressIgnoredPorts = "22"
 	}
 
 	// set ports
@@ -217,9 +226,10 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		AppendInit:            len(pod.Spec.InitContainers) > 0,
 		AppendSidecar:         len(pod.Spec.Containers) > 0,
 		Init: patch.InitMeta{
-			Ports:          ports,
-			ContainerImage: s.Config.InitImage,
-			IgnoredIPs:     s.Config.IgnoredIPs,
+			Ports:              ports,
+			EgressIgnoredPorts: egressIgnoredPorts,
+			ContainerImage:     s.Config.InitImage,
+			IgnoredIPs:         s.Config.IgnoredIPs,
 		},
 		Sidecar: patch.SidecarMeta{
 			VirtualNodeName:             name,

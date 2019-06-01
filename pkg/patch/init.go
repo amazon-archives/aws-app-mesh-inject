@@ -41,15 +41,20 @@ const initContainerTemplate = `
     {
       "name": "APPMESH_EGRESS_IGNORED_IP",
       "value": "{{ .IgnoredIPs }}"
+    },
+    {
+      "name": "APPMESH_EGRESS_IGNORED_PORTS",
+      "value": "{{ .EgressIgnoredPorts }}"
     }
   ]
 }
 `
 
 type InitMeta struct {
-	ContainerImage string
-	Ports          string
-	IgnoredIPs     string
+	ContainerImage     string
+	Ports              string
+	EgressIgnoredPorts string
+	IgnoredIPs         string
 }
 
 func renderInit(meta InitMeta) (string, error) {

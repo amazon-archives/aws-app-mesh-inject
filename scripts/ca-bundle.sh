@@ -5,10 +5,8 @@ set -o pipefail
 
 ROOT=$(cd $(dirname $0)/../; pwd)
 
-export CA_BUNDLE=$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}' | base64 | tr -d '\n')
-
 if [[ -z $CA_BUNDLE ]]; then
-    export CA_BUNDLE=$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.requestheader-client-ca-file}' | base64 | tr -d '\n')
+    export CA_BUNDLE=$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}' | base64 | tr -d '\n')
 fi
 
 if [[ -z $CA_BUNDLE ]]; then

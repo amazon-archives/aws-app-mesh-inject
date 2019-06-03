@@ -44,7 +44,7 @@ $ export INJECT_XRAY_SIDECAR=true
 The CA bundle can also be configured manually by setting a `CA_BUNDLE` environment variable to the content of the bundle.
 
 ```
-$ export CA_BUNDLE=$(cat /path/to/ca-bundle)
+$ export CA_BUNDLE=$(cat /path/to/ca-bundle | base64)
 ```
 
 Now you can deploy the appmesh injector
@@ -122,4 +122,4 @@ If the CA bundle isn't configured properly, the pod will log the following log m
 TLS handshake error from 10.0.0.1:45390: remote error: tls: bad certificate
 ```
 
-If this happens, set the `CA_BUNDLE` environment variable to the content of the CA bundle (it should start with `-----BEGIN CERTIFICATE-----`)
+If this happens, set the `CA_BUNDLE` environment variable to the content of the CA bundle. Make sure that this value is base64 encoded (e.g. it shouldn't start with `-----BEGIN CERTIFICATE-----`).

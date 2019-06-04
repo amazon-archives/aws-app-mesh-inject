@@ -40,6 +40,12 @@ $ export INJECT_STATSD_EXPORTER_SIDECAR=true
 $ export INJECT_XRAY_SIDECAR=true
 ```
 
+(Optional) The appmesh injector needs a CA bundle to trust the webhooks coming from Kubernetes. The installation scripts will make a best-effort attempt at fetching it automatically, but this cannot be done in some cases.
+The CA bundle can also be configured manually by setting a `CA_BUNDLE` environment variable to the content of the bundle.
+
+```
+$ export CA_BUNDLE=$(cat /path/to/ca-bundle | base64)
+```
 
 Now you can deploy the appmesh injector
 
@@ -114,3 +120,15 @@ spec:
 ```
 
 To see an example on how to use this sidecar injector you can visit the [demo page](https://github.com/aws/aws-app-mesh-examples/tree/master/examples/interactive-demo).
+
+## Troubleshooting
+
+### CA bundle not configured properly
+
+If the CA bundle isn't configured properly, the pod will log the following log message:
+
+```
+TLS handshake error from 10.0.0.1:45390: remote error: tls: bad certificate
+```
+
+If this happens, set the `CA_BUNDLE` environment variable to the content of the CA bundle. Make sure that this value is base64 encoded (e.g. it shouldn't start with `-----BEGIN CERTIFICATE-----`).

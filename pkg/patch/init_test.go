@@ -1,6 +1,7 @@
 package patch
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -18,6 +19,10 @@ func Test_Init(t *testing.T) {
 	init, err := renderInit(meta)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if !json.Valid([]byte(init)) {
+		t.Fatal("invalid json")
 	}
 
 	if !strings.Contains(init, "80,443") {

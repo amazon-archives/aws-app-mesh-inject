@@ -1,6 +1,7 @@
 package patch
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -66,6 +67,10 @@ func TestGeneratePatch_AppendSidecarTrue(t *testing.T) {
 	patch, err := GeneratePatch(meta)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if !json.Valid([]byte(patch)) {
+		t.Fatal("invalid json")
 	}
 
 	verifyPatch(t, string(patch), meta)

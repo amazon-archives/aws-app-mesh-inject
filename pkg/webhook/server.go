@@ -230,6 +230,8 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			EgressIgnoredPorts: egressIgnoredPorts,
 			ContainerImage:     s.Config.InitImage,
 			IgnoredIPs:         s.Config.IgnoredIPs,
+			MemoryRequests:     s.Config.SidecarMemory,
+			CpuRequests:        s.Config.SidecarCpu,
 		},
 		Sidecar: patch.SidecarMeta{
 			VirtualNodeName:             name,

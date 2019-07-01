@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+VERSION=${VERSION:=$(curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/VERSION)}
+
 set -e
 
 [ -z "$MESH_NAME" ] && { echo "Need to set the environment variable MESH_NAME"; exit 1; }
@@ -25,13 +27,13 @@ echo "\nWorking directory at ${tmpdir}\n"
 cd $tmpdir
 
 mkdir -p deploy
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.5/deploy/inject-ns.yaml > deploy/inject-ns.yaml
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.5/deploy/inject.yaml.template > deploy/inject.yaml.template
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/${VERSION}/deploy/inject-ns.yaml > deploy/inject-ns.yaml
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/${VERSION}/deploy/inject.yaml.template > deploy/inject.yaml.template
 
 mkdir -p scripts
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.5/scripts/gen-cert.sh > scripts/gen-cert.sh
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.5/scripts/ca-bundle.sh > scripts/ca-bundle.sh
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/${VERSION}/scripts/gen-cert.sh > scripts/gen-cert.sh
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/${VERSION}/scripts/ca-bundle.sh > scripts/ca-bundle.sh
 
 chmod u+x ./scripts/ca-bundle.sh ./scripts/gen-cert.sh
 
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/v0.1.5/scripts/deployInjector.sh | bash
+curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/${VERSION}/scripts/deployInjector.sh | bash

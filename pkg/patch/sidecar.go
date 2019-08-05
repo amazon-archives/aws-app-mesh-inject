@@ -10,7 +10,6 @@ const envoyContainerTemplate = `
 {
   "name": "envoy",
   "image": "{{ .ContainerImage }}",
-  "imagePullPolicy": "Always",
   "securityContext": {
     "runAsUser": 1337
   },

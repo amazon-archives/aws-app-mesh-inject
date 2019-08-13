@@ -72,7 +72,7 @@ spec:
           imagePullPolicy: Always
           command:
             - ./appmeshinject
-            - -sidecar-image=${SIDECAR_IMAGE:-111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.9.1.0-prod}
+            - -sidecar-image=${SIDECAR_IMAGE:-111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.11.1.0-prod}
             - -init-image=${INIT_IMAGE:-111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2}
             - -inject-xray-sidecar=${INJECT_XRAY_SIDECAR:-false}
             - -enable-stats-tags=${ENABLE_STATS_TAGS:-false}

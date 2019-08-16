@@ -119,7 +119,7 @@ spec:
         appmesh.k8s.aws/sidecarInjectorWebhook: disabled
 ```
 
-To see an example on how to use this sidecar injector you can visit the [demo page](https://github.com/aws/aws-app-mesh-examples/tree/master/examples/interactive-demo).
+To see an example on how to use this sidecar injector you can visit the [demo page](https://github.com/aws/aws-app-mesh-examples/tree/master/examples/). 
 
 ## Troubleshooting
 

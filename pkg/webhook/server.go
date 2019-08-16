@@ -31,6 +31,8 @@ var (
 	meshNameAnnotation           = "appmesh.k8s.aws/mesh"
 	portsAnnotation              = "appmesh.k8s.aws/ports"
 	egressIgnoredPortsAnnotation = "appmesh.k8s.aws/egressIgnoredPorts"
+	cpuRequestAnnotation         = "appmesh.k8s.aws/cpuRequest"
+	memoryRequestAnnotation      = "appmesh.k8s.aws/memoryRequest"
 	virtualNodeNameAnnotation    = "appmesh.k8s.aws/virtualNode"
 	sidecarInjectAnnotation      = "appmesh.k8s.aws/sidecarInjectorWebhook"
 )
@@ -217,6 +219,22 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		}
 	}
 
+	// set cpu-request
+	var cpuRequest string
+	if v, ok := pod.ObjectMeta.Annotations[cpuRequestAnnotation]; ok {
+		cpuRequest = v
+	} else {
+		cpuRequest = s.Config.SidecarCpu
+	}
+
+	// set memory-request
+	var memoryRequest string
+	if v, ok := pod.ObjectMeta.Annotations[memoryRequestAnnotation]; ok {
+		memoryRequest = v
+	} else {
+		memoryRequest = s.Config.SidecarMemory
+	}
+
 	klog.Infof("Patching pod %v", pod.ObjectMeta)
 
 	// patch pod spec
@@ -237,8 +255,8 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			LogLevel:                    s.Config.LogLevel,
 			Region:                      s.Config.Region,
 			MeshName:                    meshName,
-			MemoryRequests:              s.Config.SidecarMemory,
-			CpuRequests:                 s.Config.SidecarCpu,
+			MemoryRequests:              memoryRequest,
+			CpuRequests:                 cpuRequest,
 			InjectXraySidecar:           s.Config.InjectXraySidecar,
 			EnableStatsTags:             s.Config.EnableStatsTags,
 			EnableStatsD:                s.Config.EnableStatsD,

@@ -61,7 +61,7 @@ spec:
       serviceAccountName: aws-app-mesh-inject-sa
       containers:
         - name: webhook
-          image: ${IMAGE_NAME:-602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.5}
+          image: ${IMAGE_NAME:-602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.6}
           env:
             - name: APPMESH_REGION
               value: ${MESH_REGION:-}

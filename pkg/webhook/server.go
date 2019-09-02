@@ -172,10 +172,13 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		return admissionResponseError(err)
 	}
 
-	// If sidecar injection is disabled in the annotation, we skip mutating
-	switch strings.ToLower(pod.ObjectMeta.Annotations[sidecarInjectAnnotation]) {
-	case "disabled":
-		klog.Info("Sidecar inject is disabled. Skipping mutating")
+	shouldInject, err := s.shouldInject(pod)
+	if err != nil {
+		return admissionResponseError(err)
+	}
+
+	if shouldInject == false {
+		klog.Info("Sidecar inject is disabled. Skipping mutation")
 		return &admissionResponse
 	}
 
@@ -298,6 +301,30 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 	admissionResponse.PatchType = &pt
 
 	return &admissionResponse
+}
+
+// Determines if the sidecars should be injected or not
+func (s *Server) shouldInject(pod corev1.Pod) (bool, error) {
+	// If sidecar injection is explicitely set in the annotation, honor it
+	sidecarInjection := strings.ToLower(pod.ObjectMeta.Annotations[sidecarInjectAnnotation])
+	if sidecarInjection != "" {
+		inject := s.convertAnnotation(sidecarInjection)
+		klog.Info(fmt.Sprintf("Sidecar inject is %v in %v for pod %v/%v", inject, sidecarInjectAnnotation, pod.GetNamespace(), pod.GetName()))
+		return inject, nil
+	}
+
+	// Otherwise use the default value
+	return s.Config.InjectDefault, nil
+}
+
+// Converts the injection annotation string to a boolean
+func (s *Server) convertAnnotation(annotation string) bool {
+	switch strings.ToLower(annotation) {
+	case "disabled":
+		return false
+	default:
+		return true
+	}
 }
 
 func (s *Server) decode(b []byte, o runtime.Object) error {

@@ -6,6 +6,9 @@ type Config struct {
 	TlsCert string
 	TlsKey  string
 
+	// Injetion Settings
+	InjectDefault bool
+
 	// Sidecar settings
 	SidecarImage  string
 	SidecarCpu    string

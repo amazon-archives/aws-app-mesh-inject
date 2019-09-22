@@ -12,6 +12,7 @@ type Config struct {
 	SidecarMemory string
 	MeshName      string
 	Region        string
+	Preview       bool
 	LogLevel      string
 	EcrSecret     bool
 

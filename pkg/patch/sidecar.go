@@ -26,6 +26,10 @@ const envoyContainerTemplate = `
       "value": "mesh/{{ .MeshName }}/virtualNode/{{ .VirtualNodeName }}"
     },
     {
+      "name": "APPMESH_PREVIEW",
+      "value": "{{ .Preview }}"
+    },
+    {
       "name": "ENVOY_LOG_LEVEL",
       "value": "{{ .LogLevel }}"
     },
@@ -119,6 +123,7 @@ type SidecarMeta struct {
 	ContainerImage              string
 	MeshName                    string
 	VirtualNodeName             string
+	Preview                     string
 	LogLevel                    string
 	Region                      string
 	CpuRequests                 string

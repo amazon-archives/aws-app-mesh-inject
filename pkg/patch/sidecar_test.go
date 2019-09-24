@@ -10,6 +10,7 @@ func Test_Sidecar(t *testing.T) {
 	meta := SidecarMeta{
 		LogLevel:        "debug",
 		Region:          "us-west-2",
+		Preview:         "0",
 		VirtualNodeName: "podinfo",
 		MeshName:        "global",
 		ContainerImage:  "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
@@ -23,6 +24,7 @@ func Test_Sidecar_WithXray(t *testing.T) {
 	meta := SidecarMeta{
 		LogLevel:          "debug",
 		Region:            "us-west-2",
+		Preview:           "0",
 		VirtualNodeName:   "podinfo",
 		MeshName:          "global",
 		ContainerImage:    "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
@@ -38,6 +40,7 @@ func Test_Sidecar_WithStatsTags(t *testing.T) {
 	meta := SidecarMeta{
 		LogLevel:        "debug",
 		Region:          "us-west-2",
+		Preview:         "0",
 		VirtualNodeName: "podinfo",
 		MeshName:        "global",
 		ContainerImage:  "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
@@ -54,6 +57,7 @@ func Test_Sidecar_WithStatsD(t *testing.T) {
 	meta := SidecarMeta{
 		LogLevel:                    "debug",
 		Region:                      "us-west-2",
+		Preview:                     "0",
 		VirtualNodeName:             "podinfo",
 		MeshName:                    "global",
 		ContainerImage:              "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
@@ -101,6 +105,7 @@ func checkEnvoy(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 		"APPMESH_VIRTUAL_NODE_NAME": fmt.Sprintf("mesh/%s/virtualNode/%s", meta.MeshName, meta.VirtualNodeName),
 		"AWS_REGION":                meta.Region,
 		"ENVOY_LOG_LEVEL":           meta.LogLevel,
+		"APPMESH_PREVIEW":           meta.Preview,
 	}
 
 	if meta.InjectXraySidecar {

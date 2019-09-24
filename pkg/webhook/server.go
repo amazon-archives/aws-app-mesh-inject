@@ -35,6 +35,7 @@ var (
 	memoryRequestAnnotation      = "appmesh.k8s.aws/memoryRequest"
 	virtualNodeNameAnnotation    = "appmesh.k8s.aws/virtualNode"
 	sidecarInjectAnnotation      = "appmesh.k8s.aws/sidecarInjectorWebhook"
+	previewAnnotation            = "appmesh.k8s.aws/preview"
 )
 
 type Server struct {
@@ -219,6 +220,22 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		}
 	}
 
+	// set preview channel enabled
+	var preview string
+	if v, ok := pod.ObjectMeta.Annotations[previewAnnotation]; ok {
+		if v == "true" {
+			preview = "1"
+		} else {
+			preview = "0"
+		}
+	} else {
+		if s.Config.Preview {
+			preview = "1"
+		} else {
+			preview = "0"
+		}
+	}
+
 	// set cpu-request
 	var cpuRequest string
 	if v, ok := pod.ObjectMeta.Annotations[cpuRequestAnnotation]; ok {
@@ -254,6 +271,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			ContainerImage:              s.Config.SidecarImage,
 			LogLevel:                    s.Config.LogLevel,
 			Region:                      s.Config.Region,
+			Preview:                     preview,
 			MeshName:                    meshName,
 			MemoryRequests:              memoryRequest,
 			CpuRequests:                 cpuRequest,

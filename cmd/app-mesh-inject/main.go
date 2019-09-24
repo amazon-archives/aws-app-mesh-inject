@@ -47,6 +47,7 @@ func init() {
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&cfg.MeshName, "mesh-name", os.Getenv("APPMESH_NAME"), "AWS App Mesh name")
 	flag.StringVar(&cfg.Region, "region", os.Getenv("APPMESH_REGION"), "AWS App Mesh region")
+	flag.BoolVar(&cfg.Preview, "preview", false, "Enable preview channel")
 	flag.StringVar(&cfg.LogLevel, "log-level", os.Getenv("APPMESH_LOG_LEVEL"), "AWS App Mesh envoy log level")
 	flag.BoolVar(&cfg.EcrSecret, "ecr-secret", false, "Inject AWS app mesh pull secrets")
 	flag.IntVar(&cfg.Port, "port", 8080, "Webhook port")

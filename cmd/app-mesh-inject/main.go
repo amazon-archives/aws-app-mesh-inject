@@ -59,6 +59,7 @@ func init() {
 	flag.StringVar(&cfg.SidecarMemory, "sidecar-memory-requests", "32Mi", "Envoy sidecar memory resources requests.")
 	flag.StringVar(&cfg.InitImage, "init-image", "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2", "Init container image.")
 	flag.StringVar(&cfg.IgnoredIPs, "ignored-ips", "169.254.169.254", "Init container ignored IPs.")
+	flag.BoolVar(&cfg.EnableSidecarConfig, "enable-static-config", true, "Expects Envoy static config mounted at /tmp/envoy/envoyconf.yaml")
 	flag.BoolVar(&cfg.InjectXraySidecar, "inject-xray-sidecar", false, "Enable Envoy X-Ray tracing integration and injects xray-daemon as sidecar")
 	flag.BoolVar(&cfg.EnableStatsTags, "enable-stats-tags", false, "Enable Envoy to tag stats")
 	flag.BoolVar(&cfg.EnableStatsD, "enable-statsd", false, "If enabled, Envoy will send DogStatsD metrics to 127.0.0.1:8125")

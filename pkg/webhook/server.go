@@ -275,6 +275,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			MeshName:                    meshName,
 			MemoryRequests:              memoryRequest,
 			CpuRequests:                 cpuRequest,
+			EnableStaticConfig:          s.Config.EnableSidecarConfig,
 			InjectXraySidecar:           s.Config.InjectXraySidecar,
 			EnableStatsTags:             s.Config.EnableStatsTags,
 			EnableStatsD:                s.Config.EnableStatsD,

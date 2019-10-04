@@ -53,7 +53,6 @@ func Test_Sidecar_WithStatsTags(t *testing.T) {
 }
 
 func Test_Sidecar_WithStatsD(t *testing.T) {
-
 	meta := SidecarMeta{
 		LogLevel:                    "debug",
 		Region:                      "us-west-2",
@@ -66,6 +65,23 @@ func Test_Sidecar_WithStatsD(t *testing.T) {
 		EnableStatsTags:             true,
 		EnableStatsD:                true,
 		InjectStatsDExporterSidecar: true,
+	}
+
+	checkSidecars(t, meta)
+
+}
+
+func Test_Sidecar_WithStaticConfig(t *testing.T) {
+	meta := SidecarMeta{
+		LogLevel:           "debug",
+		Region:             "us-west-2",
+		Preview:            "0",
+		VirtualNodeName:    "podinfo",
+		MeshName:           "global",
+		ContainerImage:     "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
+		CpuRequests:        "100m",
+		MemoryRequests:     "128Mi",
+		EnableStaticConfig: true,
 	}
 
 	checkSidecars(t, meta)
@@ -106,6 +122,28 @@ func checkEnvoy(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 		"AWS_REGION":                meta.Region,
 		"ENVOY_LOG_LEVEL":           meta.LogLevel,
 		"APPMESH_PREVIEW":           meta.Preview,
+	}
+
+	if meta.EnableStaticConfig {
+		expectedEnvs["ENVOY_STATS_CONFIG_FILE"] = "/tmp/envoy/envoyconf.yaml"
+
+		mounts := m["volumeMounts"].([]interface{})
+		if len(mounts) < 1 {
+			t.Errorf("no volume mounts found")
+		}
+
+		mount := mounts[0].(map[string]interface{})
+		mountName := mount["name"].(string)
+		expectedMountName := "config"
+		if mountName != expectedMountName {
+			t.Errorf("volume mount name is set to %s instead of %s", mountName, expectedMountName)
+		}
+
+		mountPath := mount["mountPath"].(string)
+		expectedMountPath := "/tmp/envoy"
+		if mountPath != expectedMountPath {
+			t.Errorf("volume mount path is set to %s instead of %s", mountPath, expectedMountPath)
+		}
 	}
 
 	if meta.InjectXraySidecar {
@@ -152,7 +190,6 @@ func checkXrayDaemon(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 		t.Errorf("Xray daemon container image is not set to amazon/aws-xray-daemon")
 	}
 }
-
 
 func checkStatsDExporter(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 	if !meta.InjectStatsDExporterSidecar {

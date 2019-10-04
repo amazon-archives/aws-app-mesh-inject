@@ -20,6 +20,9 @@ type Config struct {
 	InitImage  string
 	IgnoredIPs string
 
+	// Static config
+	EnableSidecarConfig bool
+
 	// Observability settings
 	InjectXraySidecar           bool
 	EnableStatsTags             bool

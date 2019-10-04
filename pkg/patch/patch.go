@@ -63,5 +63,20 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		patches = append(patches, ecrPatch)
 	}
 
+	if meta.Sidecar.EnableStaticConfig {
+		envoyConfig := `
+{
+  "name": "config",
+  "configMap": {
+  	"name": "appmesh-envoy"
+  }
+}
+`
+		volumePatch := fmt.Sprintf(add, "volumes", envoyConfig)
+		patches = append(patches, volumePatch)
+	}
+
+	fmt.Println(patches)
+
 	return []byte(fmt.Sprintf("[%s]", strings.Join(patches, ","))), nil
 }

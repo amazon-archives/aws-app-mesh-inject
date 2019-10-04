@@ -20,12 +20,12 @@ type Config struct {
 	InitImage  string
 	IgnoredIPs string
 
-	// Static config
-	EnableSidecarConfig bool
-
 	// Observability settings
 	InjectXraySidecar           bool
 	EnableStatsTags             bool
 	EnableStatsD                bool
 	InjectStatsDExporterSidecar bool
+	EnableJaegerTracing         bool
+	JaegerAddress               string
+	JaegerPort                  string
 }

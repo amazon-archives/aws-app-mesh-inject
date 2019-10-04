@@ -127,7 +127,7 @@ func mockServer() *Server {
 		MeshName:            "global",
 		Region:              "us-west-2",
 		LogLevel:            "debug",
-		EnableSidecarConfig: true,
+		EnableJaegerTracing: true,
 	}
 
 	scheme := runtime.NewScheme()

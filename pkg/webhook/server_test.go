@@ -123,10 +123,11 @@ const admissionReview = `
 
 func mockServer() *Server {
 	cfg := config.Config{
-		Port:     8080,
-		MeshName: "global",
-		Region:   "us-west-2",
-		LogLevel: "debug",
+		Port:                8080,
+		MeshName:            "global",
+		Region:              "us-west-2",
+		LogLevel:            "debug",
+		EnableJaegerTracing: true,
 	}
 
 	scheme := runtime.NewScheme()

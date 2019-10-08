@@ -32,7 +32,11 @@ const envoyContainerTemplate = `
     {
       "name": "ENVOY_LOG_LEVEL",
       "value": "{{ .LogLevel }}"
-    },
+    }{{ if .EnableJaegerTracing }},
+    {
+      "name": "ENVOY_STATS_CONFIG_FILE",
+      "value": "/tmp/envoy/envoyconf.yaml"
+    }{{ end }},
     {
       "name": "AWS_REGION",
       "value": "{{ .Region }}"
@@ -49,7 +53,13 @@ const envoyContainerTemplate = `
       "name": "ENABLE_ENVOY_DOG_STATSD",
       "value": "1"
     }{{ end }}
-  ],
+  ]{{ if .EnableJaegerTracing }},
+  "volumeMounts": [
+    {
+      "mountPath": "/tmp/envoy",
+      "name": "config"
+    }
+  ]{{ end }},
   "resources": {
     "requests": {
       "cpu": "{{ .CpuRequests }}",
@@ -128,6 +138,9 @@ type SidecarMeta struct {
 	Region                      string
 	CpuRequests                 string
 	MemoryRequests              string
+	EnableJaegerTracing         bool
+	JaegerAddress               string
+	JaegerPort                  string
 	InjectXraySidecar           bool
 	EnableStatsTags             bool
 	EnableStatsD                bool

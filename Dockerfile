@@ -1,12 +1,10 @@
 # build stage
-FROM golang:1.12-alpine AS build-env
+FROM golang:1.13-alpine AS build-env
 
 RUN apk add git
 
 RUN mkdir -p /go/src/github.com/aws/aws-app-mesh-inject
 WORKDIR /go/src/github.com/aws/aws-app-mesh-inject
-
-ENV GO111MODULE=on
 
 COPY go.mod .
 COPY go.sum .

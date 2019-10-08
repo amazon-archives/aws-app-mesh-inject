@@ -25,4 +25,7 @@ type Config struct {
 	EnableStatsTags             bool
 	EnableStatsD                bool
 	InjectStatsDExporterSidecar bool
+	EnableJaegerTracing         bool
+	JaegerAddress               string
+	JaegerPort                  string
 }

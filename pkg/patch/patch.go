@@ -63,5 +63,22 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		patches = append(patches, ecrPatch)
 	}
 
+	if meta.Sidecar.EnableJaegerTracing {
+		// add an empty dir volume for the Envoy static config
+		volumePatch := fmt.Sprintf(add, "volumes", renderJaegerConfigVolume())
+		patches = append(patches, volumePatch)
+
+		// add an init container that writes the Envoy static config to the empty dir volume
+		jaegerInit, err := renderJaegerInitContainer(meta.Sidecar.JaegerAddress, meta.Sidecar.JaegerPort)
+		if err != nil {
+			return []byte(patch), err
+		}
+
+		j := fmt.Sprintf(add, "initContainers", jaegerInit)
+		patches = append(patches, j)
+	}
+
+	fmt.Println(patches)
+
 	return []byte(fmt.Sprintf("[%s]", strings.Join(patches, ","))), nil
 }

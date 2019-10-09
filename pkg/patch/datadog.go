@@ -21,14 +21,14 @@ static_resources:
     type: strict_dns
     lb_policy: round_robin
     load_assignment:
-      cluster_name: datadog
+      cluster_name: datadog_agent
       endpoints:
       - lb_endpoints:
         - endpoint:
            address:
             socket_address:
              address: {{ .Address }}
-             port_value: {{ .Port }}        
+             port_value: {{ .Port }}
 `
 
 const injectDatadogTemplate = `

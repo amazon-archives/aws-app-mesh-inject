@@ -82,7 +82,7 @@ func Test_Sidecar_WithDatadog(t *testing.T) {
 		CpuRequests:          "100m",
 		MemoryRequests:       "128Mi",
 		EnableDatadogTracing: true,
-		DatadogAddress:       "appmesh-datadog.appmesh-system",
+		DatadogAddress:       "datadog.appmesh-system",
 		DatadogPort:          "8126",
 	}
 

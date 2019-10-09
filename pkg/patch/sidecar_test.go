@@ -55,17 +55,16 @@ func Test_Sidecar_WithStatsTags(t *testing.T) {
 
 func Test_Sidecar_WithStatsD(t *testing.T) {
 	meta := SidecarMeta{
-		LogLevel:                    "debug",
-		Region:                      "us-west-2",
-		Preview:                     "0",
-		VirtualNodeName:             "podinfo",
-		MeshName:                    "global",
-		ContainerImage:              "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
-		CpuRequests:                 "100m",
-		MemoryRequests:              "128Mi",
-		EnableStatsTags:             true,
-		EnableStatsD:                true,
-		InjectStatsDExporterSidecar: true,
+		LogLevel:        "debug",
+		Region:          "us-west-2",
+		Preview:         "0",
+		VirtualNodeName: "podinfo",
+		MeshName:        "global",
+		ContainerImage:  "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
+		CpuRequests:     "100m",
+		MemoryRequests:  "128Mi",
+		EnableStatsTags: true,
+		EnableStatsD:    true,
 	}
 
 	checkSidecars(t, meta)
@@ -109,8 +108,6 @@ func checkSidecars(t *testing.T, meta SidecarMeta) {
 			checkEnvoy(t, cm, meta)
 		case "xray-daemon":
 			checkXrayDaemon(t, cm, meta)
-		case "statsd-exporter":
-			checkStatsDExporter(t, cm, meta)
 		default:
 			t.Errorf("Unexpected container found with name %s", cm["name"])
 		}
@@ -189,15 +186,5 @@ func checkXrayDaemon(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 
 	if m["image"] != "amazon/aws-xray-daemon" {
 		t.Errorf("Xray daemon container image is not set to amazon/aws-xray-daemon")
-	}
-}
-
-func checkStatsDExporter(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
-	if !meta.InjectStatsDExporterSidecar {
-		t.Errorf("StatsD exporter sidecar is added when InjectStatsDExporterSidecar is false")
-	}
-
-	if m["image"] != "maddox/statsd-exporter" {
-		t.Errorf("StatsD exporter container image is not set to maddox/statsd-exporter")
 	}
 }

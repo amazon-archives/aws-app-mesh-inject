@@ -91,60 +91,21 @@ const xrayDaemonContainerTemplate = `
 }
 `
 
-const statsDExporterContainerTemplate = `
-{
-  "name": "statsd-exporter",
-  "image": "maddox/statsd-exporter",
-  "securityContext": {
-    "runAsUser": 1337
-  },
-  "args": [
-    "--web.listen-address=0.0.0.0:9102",
-    "--statsd.listen-tcp=0.0.0.0:8125",
-    "--statsd.listen-udp=0.0.0.0:8125"
-  ],
-  "ports": [
-    {
-      "containerPort": 9102,
-      "name": "metrics",
-      "protocol": "TCP"
-    },
-    {
-      "containerPort": 8125,
-      "name": "tcpin",
-      "protocol": "TCP"
-    },
-    {
-      "containerPort": 8125,
-      "name": "udpin",
-      "protocol": "UDP"
-    }
-  ],
-  "resources": {
-    "requests": {
-      "cpu": "{{ .CpuRequests }}",
-      "memory": "{{ .MemoryRequests }}"
-    }
-  }
-}
-`
-
 type SidecarMeta struct {
-	ContainerImage              string
-	MeshName                    string
-	VirtualNodeName             string
-	Preview                     string
-	LogLevel                    string
-	Region                      string
-	CpuRequests                 string
-	MemoryRequests              string
-	EnableJaegerTracing         bool
-	JaegerAddress               string
-	JaegerPort                  string
-	InjectXraySidecar           bool
-	EnableStatsTags             bool
-	EnableStatsD                bool
-	InjectStatsDExporterSidecar bool
+	ContainerImage      string
+	MeshName            string
+	VirtualNodeName     string
+	Preview             string
+	LogLevel            string
+	Region              string
+	CpuRequests         string
+	MemoryRequests      string
+	EnableJaegerTracing bool
+	JaegerAddress       string
+	JaegerPort          string
+	InjectXraySidecar   bool
+	EnableStatsTags     bool
+	EnableStatsD        bool
 }
 
 func renderSidecars(meta SidecarMeta) ([]string, error) {
@@ -164,15 +125,6 @@ func renderSidecars(meta SidecarMeta) ([]string, error) {
 		}
 
 		sidecars = append(sidecars, xrayDaemonSidecar)
-	}
-
-	if meta.InjectStatsDExporterSidecar {
-		statsDSidecar, err := renderTemplate("statsd-exporter", statsDExporterContainerTemplate, meta)
-		if err != nil {
-			return sidecars, err
-		}
-
-		sidecars = append(sidecars, statsDSidecar)
 	}
 
 	return sidecars, nil

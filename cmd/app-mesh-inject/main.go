@@ -109,6 +109,11 @@ func main() {
 		}
 	}
 
+	// Only one tracer is supported
+	if cfg.EnableDatadogTracing && cfg.EnableJaegerTracing {
+		klog.Fatal("Envoy only supports a single tracer instance. Please choose between Jaeger or Datadog.")
+	}
+
 	// init webhook HTTP server
 	srv := &webhook.Server{
 		Config:      cfg,

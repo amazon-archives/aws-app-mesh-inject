@@ -65,12 +65,18 @@ func init() {
 	flag.BoolVar(&cfg.InjectXraySidecar, "inject-xray-sidecar", false, "Enable Envoy X-Ray tracing integration and injects xray-daemon as sidecar")
 	flag.BoolVar(&cfg.EnableStatsTags, "enable-stats-tags", false, "Enable Envoy to tag stats")
 	flag.BoolVar(&cfg.EnableStatsD, "enable-statsd", false, "If enabled, Envoy will send DogStatsD metrics to 127.0.0.1:8125")
+	flag.BoolVar(&cfg.InjectStatsDExporterSidecar, "inject-statsd-exporter-sidecar", false, "This flag is deprecated and does nothing")
 }
 
 func main() {
 	flag.Set("logtostderr", "true")
 	klog.InitFlags(nil)
 	flag.Parse()
+
+	// warn if deprecated flags are used
+	if cfg.InjectStatsDExporterSidecar {
+		klog.Warning("The --inject-statsd-exporter-sidecar flag is deprecated and has been ignored")
+	}
 
 	// init Kubernetes config
 	kubeConfig, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)

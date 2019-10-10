@@ -21,10 +21,11 @@ type Config struct {
 	IgnoredIPs string
 
 	// Observability settings
-	InjectXraySidecar   bool
-	EnableStatsTags     bool
-	EnableStatsD        bool
-	EnableJaegerTracing bool
-	JaegerAddress       string
-	JaegerPort          string
+	InjectXraySidecar           bool
+	EnableStatsTags             bool
+	EnableStatsD                bool
+	InjectStatsDExporterSidecar bool
+	EnableJaegerTracing         bool
+	JaegerAddress               string
+	JaegerPort                  string
 }

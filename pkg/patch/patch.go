@@ -63,6 +63,21 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		patches = append(patches, ecrPatch)
 	}
 
+	if meta.Sidecar.EnableDatadogTracing {
+		// add an empty dir volume for the Envoy static config
+		volumePatch := fmt.Sprintf(add, "volumes", renderDatadogConfigVolume())
+		patches = append(patches, volumePatch)
+
+		// add an init container that writes the Envoy static config to the empty dir volume
+		datadogInit, err := renderDatadogInitContainer(meta.Sidecar.DatadogAddress, meta.Sidecar.DatadogPort)
+		if err != nil {
+			return []byte(patch), err
+		}
+
+		j := fmt.Sprintf(add, "initContainers", datadogInit)
+		patches = append(patches, j)
+	}
+
 	if meta.Sidecar.EnableJaegerTracing {
 		// add an empty dir volume for the Envoy static config
 		volumePatch := fmt.Sprintf(add, "volumes", renderJaegerConfigVolume())

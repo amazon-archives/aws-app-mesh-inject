@@ -1,6 +1,6 @@
-# App Mesh Inject
+[![CircleCI](https://circleci.com/gh/aws/aws-app-mesh-inject.svg?style=svg)](https://circleci.com/gh/aws/aws-app-mesh-inject)
 
-[![Build Status](https://travis-ci.org/aws/aws-app-mesh-inject.svg?branch=master)](https://travis-ci.org/aws/aws-app-mesh-inject)
+# App Mesh Inject
 
 The AWS App Mesh Kubernetes sidecar injecting Admission Controller.
 

@@ -70,6 +70,24 @@ func Test_Sidecar_WithStatsD(t *testing.T) {
 	checkSidecars(t, meta)
 }
 
+func Test_Sidecar_WithDatadog(t *testing.T) {
+	meta := SidecarMeta{
+		LogLevel:             "debug",
+		Region:               "us-west-2",
+		Preview:              "0",
+		VirtualNodeName:      "podinfo",
+		MeshName:             "global",
+		ContainerImage:       "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
+		CpuRequests:          "100m",
+		MemoryRequests:       "128Mi",
+		EnableDatadogTracing: true,
+		DatadogAddress:       "datadog.appmesh-system",
+		DatadogPort:          "8126",
+	}
+
+	checkSidecars(t, meta)
+}
+
 func Test_Sidecar_WithJaeger(t *testing.T) {
 	meta := SidecarMeta{
 		LogLevel:            "debug",
@@ -122,7 +140,7 @@ func checkEnvoy(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 		"APPMESH_PREVIEW":           meta.Preview,
 	}
 
-	if meta.EnableJaegerTracing {
+	if meta.EnableJaegerTracing || meta.EnableDatadogTracing {
 		expectedEnvs["ENVOY_STATS_CONFIG_FILE"] = "/tmp/envoy/envoyconf.yaml"
 
 		mounts := m["volumeMounts"].([]interface{})

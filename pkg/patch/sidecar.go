@@ -32,7 +32,7 @@ const envoyContainerTemplate = `
     {
       "name": "ENVOY_LOG_LEVEL",
       "value": "{{ .LogLevel }}"
-    }{{ if .EnableJaegerTracing }},
+    }{{ if or .EnableJaegerTracing .EnableDatadogTracing }},
     {
       "name": "ENVOY_STATS_CONFIG_FILE",
       "value": "/tmp/envoy/envoyconf.yaml"
@@ -53,7 +53,7 @@ const envoyContainerTemplate = `
       "name": "ENABLE_ENVOY_DOG_STATSD",
       "value": "1"
     }{{ end }}
-  ]{{ if .EnableJaegerTracing }},
+  ]{{ if or .EnableJaegerTracing .EnableDatadogTracing }},
   "volumeMounts": [
     {
       "mountPath": "/tmp/envoy",
@@ -92,20 +92,23 @@ const xrayDaemonContainerTemplate = `
 `
 
 type SidecarMeta struct {
-	ContainerImage      string
-	MeshName            string
-	VirtualNodeName     string
-	Preview             string
-	LogLevel            string
-	Region              string
-	CpuRequests         string
-	MemoryRequests      string
-	EnableJaegerTracing bool
-	JaegerAddress       string
-	JaegerPort          string
-	InjectXraySidecar   bool
-	EnableStatsTags     bool
-	EnableStatsD        bool
+	ContainerImage              string
+	MeshName                    string
+	VirtualNodeName             string
+	Preview                     string
+	LogLevel                    string
+	Region                      string
+	CpuRequests                 string
+	MemoryRequests              string
+	EnableJaegerTracing         bool
+	JaegerAddress               string
+	JaegerPort                  string
+	EnableDatadogTracing        bool
+	DatadogAddress              string
+	DatadogPort                 string
+	InjectXraySidecar           bool
+	EnableStatsTags             bool
+	EnableStatsD                bool
 }
 
 func renderSidecars(meta SidecarMeta) ([]string, error) {

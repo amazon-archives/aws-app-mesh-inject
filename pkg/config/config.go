@@ -28,4 +28,7 @@ type Config struct {
 	EnableJaegerTracing         bool
 	JaegerAddress               string
 	JaegerPort                  string
+	EnableDatadogTracing        bool
+	DatadogAddress              string
+	DatadogPort                 string
 }

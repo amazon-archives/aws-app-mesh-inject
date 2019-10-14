@@ -25,14 +25,9 @@ $ export MESH_NAME=my_mesh_name
 $ export ENABLE_STATS_TAGS=true
 ```
 
-(Optional) If enabled, Envoy will emit DogStatsD metrics to 127.0.0.1:8125, where it expects to find a statsd receiver. This could be either a Datadog sidecar, or something like [statsd_exporter](https://github.com/prometheus/statsd_exporter) (see below).
+(Optional) If enabled, Envoy will emit DogStatsD metrics to 127.0.0.1:8125, where it expects to find a statsd receiver. 
 ```
 $ export ENABLE_STATSD=true
-```
-
-(Optional) To deploy [statsd_exporter](https://github.com/prometheus/statsd_exporter) as a sidecar, which can recieve statsd metrics and republish them in Prometheus format. It listens for metrics on 127.0.0.1:8125, and exposes a prometheus endpoint at 127.0.0.1:9201. This is useful as statsd provides metrics around request latency (p50, p99 etc), whereas the standard Envoy prometheus endpoint does not.
-```
-$ export INJECT_STATSD_EXPORTER_SIDECAR=true
 ```
 
 (Optional) To enable the xray-daemon sidecar injection use

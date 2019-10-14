@@ -286,7 +286,6 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			InjectXraySidecar:           s.Config.InjectXraySidecar,
 			EnableStatsTags:             s.Config.EnableStatsTags,
 			EnableStatsD:                s.Config.EnableStatsD,
-			InjectStatsDExporterSidecar: s.Config.InjectStatsDExporterSidecar,
 		},
 	})
 	if err != nil {

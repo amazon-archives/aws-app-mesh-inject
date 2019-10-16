@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/aws/aws-app-mesh-inject.svg?style=svg)](https://circleci.com/gh/aws/aws-app-mesh-inject)
+[![CircleCI](https://circleci.com/gh/aws/aws-app-mesh-inject/tree/master.svg?style=svg)](https://circleci.com/gh/aws/aws-app-mesh-inject/tree/master)
 
 # App Mesh Inject
 

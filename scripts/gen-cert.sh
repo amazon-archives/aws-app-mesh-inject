@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
 title="aws-app-mesh-inject"
 namespace="appmesh-inject"
 

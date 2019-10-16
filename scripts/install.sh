@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
+#
+# This install script is used by the tutorial in the AWS docs tutorial on using
+# App Mesh with Kubernetes:
+#
+# https://docs.aws.amazon.com/eks/latest/userguide/mesh-k8s-integration.html
+#
+# Do not modify it without testing the steps from the tutorial.  The default
+# branch and version below will be installed by users following the tutorial,
+# so the version should be updated with each release.
+#
+
 REPO=${REPO:-aws/aws-app-mesh-inject}
-VERSION=${VERSION:-$(curl https://raw.githubusercontent.com/$REPO/master/VERSION)}
+BRANCH=${BRANCH:-master}
+VERSION=${VERSION:-v0.1.6}
 
 set -e
+set -o pipefail
+
+echo "Fetching ${VERSION} from https://github.com/${REPO}/tree/${BRANCH}"
 
 [ -z "$MESH_NAME" ] && { echo "Need to set the environment variable MESH_NAME"; exit 1; }
 
@@ -28,13 +43,13 @@ cd $tmpdir
 
 mkdir -p deploy
 
-curl https://raw.githubusercontent.com/${REPO}/${VERSION}/deploy/inject-ns.yaml > deploy/inject-ns.yaml
-curl https://raw.githubusercontent.com/${REPO}/${VERSION}/deploy/inject.yaml.template > deploy/inject.yaml.template
+curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/deploy/inject-ns.yaml > deploy/inject-ns.yaml
+curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/deploy/inject.yaml.template > deploy/inject.yaml.template
 
 mkdir -p scripts
-curl https://raw.githubusercontent.com/${REPO}/${VERSION}/scripts/gen-cert.sh > scripts/gen-cert.sh
-curl https://raw.githubusercontent.com/${REPO}/${VERSION}/scripts/ca-bundle.sh > scripts/ca-bundle.sh
+curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/scripts/gen-cert.sh > scripts/gen-cert.sh
+curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/scripts/gen-inject-yaml.sh > scripts/gen-inject-yaml.sh
 
 chmod u+x ./scripts/ca-bundle.sh ./scripts/gen-cert.sh
 
-curl https://raw.githubusercontent.com/${REPO}/${VERSION}/scripts/deployInjector.sh | bash
+curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/scripts/deployInjector.sh | bash

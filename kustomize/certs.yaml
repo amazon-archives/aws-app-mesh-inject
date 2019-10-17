@@ -15,8 +15,8 @@ spec:
   isCA: false
   dnsNames:
     - aws-app-mesh-inject
-    - aws-app-mesh-inject.appmesh-inject
-    - aws-app-mesh-inject.appmesh-inject.svc
+    - aws-app-mesh-inject.appmesh-system
+    - aws-app-mesh-inject.appmesh-system.svc
   keyAlgorithm: rsa
   usages:
     - "digital signature"

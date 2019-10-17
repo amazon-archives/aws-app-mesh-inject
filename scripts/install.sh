@@ -12,7 +12,7 @@
 
 REPO=${REPO:-aws/aws-app-mesh-inject}
 BRANCH=${BRANCH:-master}
-export VERSION=${VERSION:-v0.1.6}
+export VERSION=${VERSION:-v0.2.0}
 
 set -e
 set -o pipefail

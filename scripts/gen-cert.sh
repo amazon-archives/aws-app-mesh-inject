@@ -1,6 +1,6 @@
 #!/bin/bash
 title="aws-app-mesh-inject"
-namespace="appmesh-inject"
+namespace="appmesh-system"
 
 csrName=${title}.${namespace}
 tmpdir=$(mktemp -d)

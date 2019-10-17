@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: aws-app-mesh-inject-sa
-  namespace: appmesh-inject
+  namespace: appmesh-system
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -21,7 +21,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: aws-app-mesh-inject-sa
-    namespace: appmesh-inject
+    namespace: appmesh-system
     apiGroup: ""
 roleRef:
   kind: ClusterRole
@@ -32,7 +32,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: aws-app-mesh-inject
-  namespace: appmesh-inject
+  namespace: appmesh-system
   labels:
     name: aws-app-mesh-inject
 spec:
@@ -47,7 +47,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: aws-app-mesh-inject
-  namespace: appmesh-inject
+  namespace: appmesh-system
   labels:
     name: aws-app-mesh-inject
 spec:
@@ -121,7 +121,7 @@ webhooks:
     clientConfig:
       service:
         name: aws-app-mesh-inject
-        namespace: appmesh-inject
+        namespace: appmesh-system
         path: "/"
       caBundle: "${CA_BUNDLE}"
     rules:

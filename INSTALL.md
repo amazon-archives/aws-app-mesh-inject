@@ -59,7 +59,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: aws-app-mesh-inject
-  namespace: appmesh-inject
+  namespace: appmesh-system
 spec:
   template:
     spec:
@@ -147,7 +147,7 @@ curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/scripts/in
 Wait for the sidecar injector to deploy.
 
 ```bash
-kubectl get pods -n appmesh-inject
+kubectl get pods -n appmesh-system
 NAME                                   READY   STATUS    RESTARTS   AGE
 aws-app-mesh-inject-5bb846958c-j5v24   1/1     Running   0          24s
 ```

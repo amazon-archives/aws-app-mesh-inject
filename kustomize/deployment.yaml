@@ -3,7 +3,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: aws-app-mesh-inject
-  namespace: appmesh-inject
+  namespace: appmesh-system
   labels:
     name: aws-app-mesh-inject
 spec:

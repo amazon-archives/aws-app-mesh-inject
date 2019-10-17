@@ -10,7 +10,7 @@ webhooks:
     clientConfig:
       service:
         name: aws-app-mesh-inject
-        namespace: appmesh-inject
+        namespace: appmesh-system
         path: "/"
     rules:
       - operations: ["CREATE","UPDATE"]

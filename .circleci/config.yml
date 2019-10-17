@@ -17,11 +17,14 @@ jobs:
             export CA_BUNDLE="abcdefabcdef"
             export MESH_REGION=us-west-2
             export MESH_NAME=mesh
+            export VERSION=v1
             eval "cat \<<EOF
             $(<deploy/inject.yaml.template)
             EOF
             " > inject.yaml
+            cat inject.yaml
             kubeval --strict --ignore-missing-schemas inject.yaml
+            cat deploy/inject-ns.yaml
             kubeval --strict --ignore-missing-schemas deploy/inject-ns.yaml
   build-test-run:
     docker:

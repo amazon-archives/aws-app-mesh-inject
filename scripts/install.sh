@@ -50,6 +50,6 @@ mkdir -p scripts
 curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/scripts/gen-cert.sh > scripts/gen-cert.sh
 curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/scripts/gen-inject-yaml.sh > scripts/gen-inject-yaml.sh
 
-chmod u+x ./scripts/ca-bundle.sh ./scripts/gen-cert.sh
+chmod u+x ./scripts/gen-inject-yaml.sh ./scripts/gen-cert.sh
 
 curl https://raw.githubusercontent.com/${REPO}/${BRANCH}/scripts/deployInjector.sh | bash

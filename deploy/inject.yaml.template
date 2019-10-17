@@ -77,7 +77,6 @@ spec:
             - -inject-xray-sidecar=${INJECT_XRAY_SIDECAR:-false}
             - -enable-stats-tags=${ENABLE_STATS_TAGS:-false}
             - -enable-statsd=${ENABLE_STATSD:-false}
-            - -inject-statsd-exporter-sidecar=${INJECT_STATSD_EXPORTER_SIDECAR:-false}
             - -sidecar-cpu-requests=${SIDECAR_CPU_REQUESTS:-100m}
             - -sidecar-memory-requests=${SIDECAR_MEMORY_REQUESTS:-128Mi}
           resources:

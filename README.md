@@ -8,77 +8,8 @@ The AWS App Mesh Kubernetes sidecar injecting Admission Controller.
 
 If you think you’ve found a potential security issue, please do not post it in the Issues.  Instead, please follow the instructions [here](https://aws.amazon.com/security/vulnerability-reporting/) or [email AWS security directly](mailto:aws-security@amazon.com).
 
-## Prerequisites
-CLI Install:
-* [openssl](https://www.openssl.org/source/)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-* [jq](https://stedolan.github.io/jq/download/)
-
-To install using [Kustomize](https://kustomize.io/) and 
-[Cert-Manager](https://docs.cert-manager.io/en/latest/index.html) please reference the README 
-in the [kustomize folder](./kustomize/README.md).
-
-## CLI Install
-
-To deploy the sidecar injector you must export the name of your new mesh
-```
-$ export MESH_NAME=my_mesh_name
-```
-
-(Optional) To enable stats_tags on sidecar (Envoy) use
-```
-$ export ENABLE_STATS_TAGS=true
-```
-
-(Optional) If enabled, Envoy will emit DogStatsD metrics to 127.0.0.1:8125, where it expects to find a statsd receiver. This could be either a Datadog sidecar, or something like [statsd_exporter](https://github.com/prometheus/statsd_exporter) (see below).
-```
-$ export ENABLE_STATSD=true
-```
-
-(Optional) To deploy [statsd_exporter](https://github.com/prometheus/statsd_exporter) as a sidecar, which can recieve statsd metrics and republish them in Prometheus format. It listens for metrics on 127.0.0.1:8125, and exposes a prometheus endpoint at 127.0.0.1:9201. This is useful as statsd provides metrics around request latency (p50, p99 etc), whereas the standard Envoy prometheus endpoint does not.
-```
-$ export INJECT_STATSD_EXPORTER_SIDECAR=true
-```
-
-(Optional) To enable the xray-daemon sidecar injection use
-```
-$ export INJECT_XRAY_SIDECAR=true
-```
-
-(Optional) The appmesh injector needs a CA bundle to trust the webhooks coming from Kubernetes. The installation scripts will make a best-effort attempt at fetching it automatically, but this cannot be done in some cases.
-The CA bundle can also be configured manually by setting a `CA_BUNDLE` environment variable to the content of the bundle.
-
-```
-$ export CA_BUNDLE=$(cat /path/to/ca-bundle | base64)
-```
-
-Now you can deploy the appmesh injector
-
-### Option 1: clone the repository
-
-```bash
-$ make deploy
-```
-
-This will bootstrap the required certificates and start the sidecar injector in
-your cluster.
-
-To cleanup you can run
-```
-$ make clean
-```
-
-### Option 2: download and execute the install script
-```bash
-curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/scripts/install.sh | bash
-```
-
-To cleanup you can run
-```
-kubectl delete namespace appmesh-inject; kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject;
-kubectl delete clusterrolebindings aws-app-mesh-inject-binding; kubectl delete clusterrole aws-app-mesh-inject-cr;
-```
-
+## Installation
+Please reference the [install instructions](INSTALL.md).
 
 ## Under the hood
 ### Enable Sidecar injection

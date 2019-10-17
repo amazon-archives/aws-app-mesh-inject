@@ -7,6 +7,7 @@ We provide several options to install the sidecar injector.
  - [CLI Install](#cli-install)
 
 [After Install](#after-install) instructions.
+[Cleanup](#cleanup) instructions.
 
 ## Helm
 
@@ -53,7 +54,6 @@ patches:
 
 mymesh.yaml
 ```yaml
-
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -153,3 +153,12 @@ aws-app-mesh-inject-5bb846958c-j5v24   1/1     Running   0          24s
 ```
 
 Return to [Under the hood](../README.md#under-the-hood) for more information on how to use the sidecar injector.
+
+## Cleanup
+
+To cleanup you can run
+```
+kubectl delete namespace appmesh-inject; kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject;
+kubectl delete clusterrolebindings aws-app-mesh-inject-binding; kubectl delete clusterrole aws-app-mesh-inject-cr;
+```
+

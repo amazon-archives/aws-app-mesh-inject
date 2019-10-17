@@ -280,10 +280,12 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			EnableJaegerTracing:         s.Config.EnableJaegerTracing,
 			JaegerAddress:               s.Config.JaegerAddress,
 			JaegerPort:                  s.Config.JaegerPort,
+			EnableDatadogTracing:        s.Config.EnableDatadogTracing,
+			DatadogAddress:              s.Config.DatadogAddress,
+			DatadogPort:                 s.Config.DatadogPort,
 			InjectXraySidecar:           s.Config.InjectXraySidecar,
 			EnableStatsTags:             s.Config.EnableStatsTags,
 			EnableStatsD:                s.Config.EnableStatsD,
-			InjectStatsDExporterSidecar: s.Config.InjectStatsDExporterSidecar,
 		},
 	})
 	if err != nil {

@@ -1,0 +1,57 @@
+version: 2.1
+jobs:
+  validate-yaml:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - run:
+          name: Install kubeval
+          command: |
+            mkdir -p $HOME/tools && \
+            cd $HOME/tools && \
+            curl -L https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz | tar xz && sudo mv kubeval /bin/kubeval
+      - run:
+          name: Validate deploy yamls
+          command: |
+            export CA_BUNDLE="abcdefabcdef"
+            export MESH_REGION=us-west-2
+            export MESH_NAME=mesh
+            eval "cat \<<EOF
+            $(<deploy/inject.yaml.template)
+            EOF
+            " > inject.yaml
+            kubeval --strict --ignore-missing-schemas inject.yaml
+            kubeval --strict --ignore-missing-schemas deploy/inject-ns.yaml
+  build-test-run:
+    docker:
+      - image: circleci/golang:1.13
+    working_directory: ~/build
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-{{ checksum "go.sum" }}
+      - run:
+          name: Build
+          command: make ci-test-build
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod/"
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - validate-yaml:
+          filters:
+            branches:
+              ignore:
+                - gh-pages
+      - build-test-run:
+          filters:
+            branches:
+              ignore:
+                - gh-pages
+

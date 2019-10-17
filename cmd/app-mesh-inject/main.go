@@ -62,16 +62,24 @@ func init() {
 	flag.BoolVar(&cfg.EnableJaegerTracing, "enable-jaeger-tracing", false, "Enable Envoy Jaeger tracing")
 	flag.StringVar(&cfg.JaegerAddress, "jaeger-address", "appmesh-jaeger.appmesh-system", "Jaeger address")
 	flag.StringVar(&cfg.JaegerPort, "jaeger-port", "9411", "Jaeger port")
+	flag.BoolVar(&cfg.EnableDatadogTracing, "enable-datadog-tracing", false, "Enable Envoy Datadog tracing")
+	flag.StringVar(&cfg.DatadogAddress, "datadog-address", "datadog.appmesh-system", "Datadog Agent address")
+	flag.StringVar(&cfg.DatadogPort, "datadog-port", "8126", "Datadog Agent tracing port")
 	flag.BoolVar(&cfg.InjectXraySidecar, "inject-xray-sidecar", false, "Enable Envoy X-Ray tracing integration and injects xray-daemon as sidecar")
 	flag.BoolVar(&cfg.EnableStatsTags, "enable-stats-tags", false, "Enable Envoy to tag stats")
 	flag.BoolVar(&cfg.EnableStatsD, "enable-statsd", false, "If enabled, Envoy will send DogStatsD metrics to 127.0.0.1:8125")
-	flag.BoolVar(&cfg.InjectStatsDExporterSidecar, "inject-statsd-exporter-sidecar", false, "Deploy statsd_exporter as a sidecar listening on 127.0.0.1:8125 to recieve metrics and export them in prometheus format on 127.0.0.1:9102")
+	flag.BoolVar(&cfg.InjectStatsDExporterSidecar, "inject-statsd-exporter-sidecar", false, "This flag is deprecated and does nothing")
 }
 
 func main() {
 	flag.Set("logtostderr", "true")
 	klog.InitFlags(nil)
 	flag.Parse()
+
+	// warn if deprecated flags are used
+	if cfg.InjectStatsDExporterSidecar {
+		klog.Warning("The --inject-statsd-exporter-sidecar flag is deprecated and has been ignored")
+	}
 
 	// init Kubernetes config
 	kubeConfig, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
@@ -104,6 +112,12 @@ func main() {
 		if err != nil {
 			klog.Fatal("Failed to determine the region from ec2 metadata", err)
 		}
+	}
+
+	// Only one tracer is supported
+
+	if config.MultipleTracer(cfg) {
+		klog.Fatal("Envoy only supports a single tracer instance. Please choose between Jaeger, Datadog or X-Ray.")
 	}
 
 	// init webhook HTTP server

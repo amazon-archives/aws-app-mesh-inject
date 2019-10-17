@@ -6,6 +6,8 @@ We provide several options to install the sidecar injector.
  - [Kustomize and Cert-Manager Install](#kustomize-and-cert-manager-install)
  - [CLI Install](#cli-install)
 
+[After Install](#after-install) instructions.
+
 ## Helm
 
 Please reference the [Helm chart repository](https://github.com/aws/eks-charts) for install instructions.

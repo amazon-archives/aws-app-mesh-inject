@@ -103,7 +103,7 @@ $ export ENABLE_STATS_TAGS=true
 $ export ENABLE_STATSD=true
 ```
 
-(Optional) To deploy [statsd_exporter](https://github.com/prometheus/statsd_exporter) as a sidecar, which can recieve statsd metrics and republish them in Prometheus format. It listens for metrics on 127.0.0.1:8125, and exposes a prometheus endpoint at 127.0.0.1:9201. This is useful as statsd provides metrics around request latency (p50, p99 etc), whereas the standard Envoy prometheus endpoint does not.
+(Optional) To deploy [statsd_exporter](https://github.com/prometheus/statsd_exporter) as a sidecar, which can receive statsd metrics and republish them in Prometheus format. It listens for metrics on 127.0.0.1:8125, and exposes a prometheus endpoint at 127.0.0.1:9201. This is useful as statsd provides metrics around request latency (p50, p99 etc), whereas the standard Envoy prometheus endpoint does not.
 ```
 $ export INJECT_STATSD_EXPORTER_SIDECAR=true
 ```

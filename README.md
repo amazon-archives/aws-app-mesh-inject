@@ -12,7 +12,7 @@ If you think you’ve found a potential security issue, please do not post it in
 Please reference the [install instructions](INSTALL.md).
 
 ### Warning
-To align our helm repository and this repository we have changed the namsepace to appmesh-system and resource names to appmesh-inject. 
+To align our helm repository and this repository we have changed the namespace to appmesh-system and resource names to appmesh-inject. 
 
 ## Under the hood
 ### Enable Sidecar injection

@@ -1,5 +1,5 @@
 #!/bin/bash
-title="aws-app-mesh-inject"
+title="appmesh-inject"
 namespace="appmesh-system"
 
 csrName=${title}.${namespace}

@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: aws-app-mesh-inject-sa
+  name: appmesh-inject
   namespace: appmesh-system
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: aws-app-mesh-inject-cr
+  name: appmesh-inject
 rules:
   - apiGroups: ["*"]
     resources: ["replicasets"]
@@ -17,48 +17,48 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: aws-app-mesh-inject-binding
+  name: appmesh-inject
 subjects:
   - kind: ServiceAccount
-    name: aws-app-mesh-inject-sa
+    name: appmesh-inject
     namespace: appmesh-system
     apiGroup: ""
 roleRef:
   kind: ClusterRole
-  name: aws-app-mesh-inject-cr
+  name: appmesh-inject
   apiGroup: ""
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: aws-app-mesh-inject
+  name: appmesh-inject
   namespace: appmesh-system
   labels:
-    name: aws-app-mesh-inject
+    name: appmesh-inject
 spec:
   ports:
   - name: webhook
     port: 443
     targetPort: 8080
   selector:
-    name: aws-app-mesh-inject
+    name: appmesh-inject
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: aws-app-mesh-inject
+  name: appmesh-inject
   namespace: appmesh-system
   labels:
-    name: aws-app-mesh-inject
+    name: appmesh-inject
 spec:
   replicas: 1
   template:
     metadata:
-      name: aws-app-mesh-inject
+      name: appmesh-inject
       labels:
-        name: aws-app-mesh-inject
+        name: appmesh-inject
     spec:
-      serviceAccountName: aws-app-mesh-inject-sa
+      serviceAccountName: appmesh-inject
       containers:
         - name: webhook
           image: ${IMAGE_NAME:-602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.6}
@@ -109,17 +109,17 @@ spec:
       volumes:
         - name: webhook-certs
           secret:
-            secretName: aws-app-mesh-inject
+            secretName: appmesh-inject
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: aws-app-mesh-inject
+  name: appmesh-inject
 webhooks:
-  - name: aws-app-mesh-inject.aws.amazon.com
+  - name: appmesh-inject.aws.amazon.com
     clientConfig:
       service:
-        name: aws-app-mesh-inject
+        name: appmesh-inject
         namespace: appmesh-system
         path: "/"
       caBundle: "${CA_BUNDLE}"

@@ -2,14 +2,14 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: aws-app-mesh-inject
+  name: appmesh-inject
   annotations:
     certmanager.k8s.io/inject-ca-from: appmesh-system/inject-cert
 webhooks:
-  - name: aws-app-mesh-inject.aws.amazon.com
+  - name: appmesh-inject.aws.amazon.com
     clientConfig:
       service:
-        name: aws-app-mesh-inject
+        name: appmesh-inject
         namespace: appmesh-system
         path: "/"
     rules:

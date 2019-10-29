@@ -2,19 +2,19 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: aws-app-mesh-inject
+  name: appmesh-inject
   namespace: appmesh-system
   labels:
-    name: aws-app-mesh-inject
+    name: appmesh-inject
 spec:
   replicas: 1
   template:
     metadata:
-      name: aws-app-mesh-inject
+      name: appmesh-inject
       labels:
-        name: aws-app-mesh-inject
+        name: appmesh-inject
     spec:
-      serviceAccountName: aws-app-mesh-inject-sa
+      serviceAccountName: appmesh-inject
       containers:
         - name: webhook
           image: 602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.6
@@ -68,4 +68,4 @@ spec:
       volumes:
         - name: webhook-certs
           secret:
-            secretName: appmesh-inject-cert-tls
+            secretName: appmesh-inject

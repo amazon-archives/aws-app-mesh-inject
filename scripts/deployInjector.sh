@@ -24,9 +24,9 @@ kubectl apply -f deploy/inject-ns.yaml
 ./scripts/ca-bundle.sh
 kubectl apply -f _output/inject.yaml
 echo "waiting for aws-app-mesh-inject to start"
-kubectl rollout status deployment/aws-app-mesh-inject -n appmesh-system
+kubectl rollout status deployment/appmesh-inject -n appmesh-system
 
-ACTUAL_APPMESH_NAME=$(kubectl get deployment aws-app-mesh-inject -n appmesh-system -o=jsonpath="{.spec.template.spec.containers[0].env[?(@.name=='APPMESH_NAME')].value}")
+ACTUAL_APPMESH_NAME=$(kubectl get deployment appmesh-inject -n appmesh-system -o=jsonpath="{.spec.template.spec.containers[0].env[?(@.name=='APPMESH_NAME')].value}")
 if [[ "$ACTUAL_APPMESH_NAME" = "$MESH_NAME" ]]; then
     echo "Mesh name has been set up"
 else

@@ -14,13 +14,13 @@ metadata:
 spec:
   isCA: false
   dnsNames:
-    - aws-app-mesh-inject
-    - aws-app-mesh-inject.appmesh-system
-    - aws-app-mesh-inject.appmesh-system.svc
+    - appmesh-inject
+    - appmesh-inject.appmesh-system
+    - appmesh-inject.appmesh-system.svc
   keyAlgorithm: rsa
   usages:
     - "digital signature"
     - "key encipherment"
-  secretName: appmesh-inject-cert-tls
+  secretName: appmesh-inject
   issuerRef:
     name: selfsigned

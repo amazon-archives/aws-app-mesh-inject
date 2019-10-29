@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
 title="appmesh-inject"
 namespace="appmesh-system"
 

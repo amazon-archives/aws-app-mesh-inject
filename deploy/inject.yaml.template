@@ -61,7 +61,7 @@ spec:
       serviceAccountName: appmesh-inject
       containers:
         - name: webhook
-          image: ${IMAGE_NAME:-602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:v0.1.6}
+          image: ${IMAGE_NAME:-602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:${VERSION}}
           env:
             - name: APPMESH_REGION
               value: ${MESH_REGION:-}

@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/aws/aws-app-mesh-inject/tree/master.svg?style=svg)](https://circleci.com/gh/aws/aws-app-mesh-inject/tree/master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/aws/aws-app-mesh-inject)](https://goreportcard.com/report/github.com/aws/aws-app-mesh-inject)
 
 # App Mesh Inject
 

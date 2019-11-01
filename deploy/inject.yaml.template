@@ -61,7 +61,7 @@ spec:
       serviceAccountName: aws-app-mesh-inject-sa
       containers:
         - name: webhook
-          image: ${IMAGE_NAME:-602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-app-mesh-inject:${VERSION}}
+          image: ${IMAGE_NAME:-602401143452.dkr.ecr.${AWS_REGION}.amazonaws.com/amazon/aws-app-mesh-inject:${VERSION}}
           env:
             - name: APPMESH_REGION
               value: ${MESH_REGION:-}
@@ -72,8 +72,8 @@ spec:
           imagePullPolicy: Always
           command:
             - ./appmeshinject
-            - -sidecar-image=${SIDECAR_IMAGE:-840364872350.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.11.2.0-prod}
-            - -init-image=${INIT_IMAGE:-111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2}
+            - -sidecar-image=${SIDECAR_IMAGE:-840364872350.dkr.ecr.${AWS_REGION}.amazonaws.com/aws-appmesh-envoy:v1.11.2.0-prod}
+            - -init-image=${INIT_IMAGE:-111345817488.dkr.ecr.${AWS_REGION}.amazonaws.com/aws-appmesh-proxy-route-manager:v2}
             - -inject-xray-sidecar=${INJECT_XRAY_SIDECAR:-false}
             - -enable-stats-tags=${ENABLE_STATS_TAGS:-false}
             - -enable-statsd=${ENABLE_STATSD:-false}

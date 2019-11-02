@@ -142,7 +142,7 @@ Specify the region to download sidecar injector.
 Please reference the [AWS Regional Table](https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/) for the supported regions
 
 ```
-$ export AWS_REGION='us-east-1'
+$ export MESH_REGION='us-east-1'
 ```
 Download and execute the install script
 

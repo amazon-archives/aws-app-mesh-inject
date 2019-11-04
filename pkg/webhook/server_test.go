@@ -159,7 +159,7 @@ const admissionReviewTemplate = `
           "appmesh.k8s.aws/ports": "9898",
           "appmesh.k8s.aws/egress_ignored_ports": "22",
           "appmesh.k8s.aws/virtualNode": "podinfo",
-          "appmesh.k8s.aws/sidecarInjectorWebhook": "%v
+          "appmesh.k8s.aws/sidecarInjectorWebhook": "%v"
         }
       },
       "spec": {
@@ -343,8 +343,8 @@ func TestServer_Inject_OptIn_WithInvalidAnnotation(t *testing.T) {
 	rr := sendWebhook(t, optInServerConfig, getAdmissionReviewPayload("invalid"))
 
 	rrBody := rr.Body.String()
-	if !containsPatch(rrBody) {
-		t.Errorf(fmt.Sprintf("expected handler to patch payload (got %v)", rrBody))
+	if containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to not patch payload (got %v)", rrBody))
 	}
 }
 
@@ -379,8 +379,8 @@ func TestServer_Inject_OptOut_WithInvalidAnnotation(t *testing.T) {
 	rr := sendWebhook(t, defaultServerConfig, getAdmissionReviewPayload("invalid"))
 
 	rrBody := rr.Body.String()
-	if containsPatch(rrBody) {
-		t.Errorf(fmt.Sprintf("expected handler to not patch payload (got %v)", rrBody))
+	if !containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to patch payload (got %v)", rrBody))
 	}
 }
 

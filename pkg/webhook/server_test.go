@@ -159,7 +159,7 @@ const admissionReviewTemplate = `
           "appmesh.k8s.aws/ports": "9898",
           "appmesh.k8s.aws/egress_ignored_ports": "22",
           "appmesh.k8s.aws/virtualNode": "podinfo",
-          "appmesh.k8s.aws/sidecarInjectorWebhook": "%v"
+          "appmesh.k8s.aws/sidecarInjectorWebhook": "%v
         }
       },
       "spec": {
@@ -229,10 +229,10 @@ const admissionReviewTemplate = `
 `
 
 var defaultServerConfig = config.Config{
-	Port:     8080,
-	MeshName: "global",
-	Region:   "us-west-2",
-	LogLevel: "debug",
+	Port:          8080,
+	MeshName:      "global",
+	Region:        "us-west-2",
+	LogLevel:      "debug",
 	InjectDefault: true,
 }
 
@@ -339,6 +339,15 @@ func TestServer_Inject_OptIn_WithEnabledAnnotation(t *testing.T) {
 	}
 }
 
+func TestServer_Inject_OptIn_WithInvalidAnnotation(t *testing.T) {
+	rr := sendWebhook(t, optInServerConfig, getAdmissionReviewPayload("invalid"))
+
+	rrBody := rr.Body.String()
+	if !containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to patch payload (got %v)", rrBody))
+	}
+}
+
 func TestServer_Inject_OptOut_WithoutAnnotation(t *testing.T) {
 	rr := sendWebhook(t, defaultServerConfig, admissionReview)
 
@@ -366,6 +375,15 @@ func TestServer_Inject_OptOut_WithDisabledAnnotation(t *testing.T) {
 	}
 }
 
+func TestServer_Inject_OptOut_WithInvalidAnnotation(t *testing.T) {
+	rr := sendWebhook(t, defaultServerConfig, getAdmissionReviewPayload("invalid"))
+
+	rrBody := rr.Body.String()
+	if containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to not patch payload (got %v)", rrBody))
+	}
+}
+
 func TestServer_Health(t *testing.T) {
 	srv := mockServer()
 
@@ -382,5 +400,41 @@ func TestServer_Health(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
+	}
+}
+
+func TestServer_convertAnnotation_enabled(t *testing.T) {
+	srv := mockServer()
+	inject, err := srv.convertAnnotation("enabled")
+
+	if err != nil {
+		t.Errorf("expected err to be nil (got %v)", err)
+	}
+
+	if inject != true {
+		t.Errorf("expected inject to be true (got %v)", inject)
+	}
+}
+
+func TestServer_convertAnnotation_disabled(t *testing.T) {
+	srv := mockServer()
+	inject, err := srv.convertAnnotation("disabled")
+
+	if err != nil {
+		t.Errorf("expected err to be nil (got %v)", err)
+	}
+
+	if inject != false {
+		t.Errorf("expected inject to be false (got %v)", inject)
+	}
+}
+
+func TestServer_convertAnnotation_invalid(t *testing.T) {
+	srv := mockServer()
+	srv.Config.InjectDefault = true
+	_, err := srv.convertAnnotation("invalid")
+
+	if err == nil {
+		t.Errorf("expected err not to be nil (got %v)", err)
 	}
 }

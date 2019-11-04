@@ -308,7 +308,11 @@ func (s *Server) shouldInject(pod corev1.Pod) (bool, error) {
 	// If sidecar injection is explicitely set in the annotation, honor it
 	sidecarInjection := strings.ToLower(pod.ObjectMeta.Annotations[sidecarInjectAnnotation])
 	if sidecarInjection != "" {
-		inject := s.convertAnnotation(sidecarInjection)
+		inject, err := s.convertAnnotation(sidecarInjection)
+		if err != nil {
+			klog.Warning(fmt.Sprintf("Error converting annotation: %v for pod %v/%v. Using default injection value", err, pod.GetNamespace(), pod.GetName()))
+			inject = s.Config.InjectDefault
+		}
 		klog.Info(fmt.Sprintf("Sidecar inject is %v in %v for pod %v/%v", inject, sidecarInjectAnnotation, pod.GetNamespace(), pod.GetName()))
 		return inject, nil
 	}
@@ -318,12 +322,14 @@ func (s *Server) shouldInject(pod corev1.Pod) (bool, error) {
 }
 
 // Converts the injection annotation string to a boolean
-func (s *Server) convertAnnotation(annotation string) bool {
+func (s *Server) convertAnnotation(annotation string) (bool, error) {
 	switch strings.ToLower(annotation) {
+	case "enabled":
+		return true, nil
 	case "disabled":
-		return false
+		return false, nil
 	default:
-		return true
+		return false, fmt.Errorf("Invalid %v annotation: %v", sidecarInjectAnnotation, annotation)
 	}
 }
 

@@ -23,9 +23,8 @@ kubectl label namespace appmesh-demo appmesh.k8s.aws/sidecarInjectorWebhook=enab
 
 ### Default behavior and how to override
 
-By default, sidecars will be injected to all new pods in the namespace that has enabled sidecar injector webhook. To disable injecting the sidecar
-to particular pods in that namespace, add `appmesh.k8s.aws/sidecarInjectorWebhook: disabled` annotation to the pod spec.
-If the injector is run with `-inject-default=false`, sidecars will only be injected to pods that have the `appmesh.k8s.aws/sidecarInjectorWebhook: enabled` annotation.
+For namespaces with sidecar injection enabled, pods will be injected if the `appmesh.k8s.aws/sidecarInjectorWebhook` annotation is `enabled` and will not be injected if it is `disabled`.
+For pods with no annotation, they will be injected if the `-inject-default=true` flag is passed (the default for this flag) and will not be injected if the `-inject-default=false` flag is passed.
 
 All container ports defined in the pod spec will be passed to sidecars as application ports.
 To override, add `appmesh.k8s.aws/ports: "<ports>"` annotation to the pod spec.

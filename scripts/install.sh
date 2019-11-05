@@ -10,13 +10,16 @@
 # so the version should be updated with each release.
 #
 
+
 REPO=${REPO:-aws/aws-app-mesh-inject}
 BRANCH=${BRANCH:-master}
+export MESH_REGION=${MESH_REGION:-us-west-2}
 export VERSION=${VERSION:-v0.2.0}
 
 set -e
 set -o pipefail
 
+echo "Using AWS region ${MESH_REGION}"
 echo "Fetching ${VERSION} from https://github.com/${REPO}/tree/${BRANCH}"
 
 [ -z "$MESH_NAME" ] && { echo "Need to set the environment variable MESH_NAME"; exit 1; }

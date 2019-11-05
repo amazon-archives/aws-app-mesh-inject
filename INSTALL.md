@@ -137,6 +137,15 @@ $ make clean
 ```
 
 ### Option 2: download and execute the install script
+
+Specify the region to download sidecar injector. 
+Please reference the [AWS Regional Table](https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/) for the supported regions
+
+```
+$ export MESH_REGION='us-east-1'
+```
+Download and execute the install script
+
 ```bash
 curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/scripts/install.sh | bash
 ```

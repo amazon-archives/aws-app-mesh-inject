@@ -54,7 +54,7 @@ func init() {
 	flag.StringVar(&cfg.TlsCert, "tlscert", "/etc/webhook/certs/cert.pem", "Location of TLS Cert file.")
 	flag.StringVar(&cfg.TlsKey, "tlskey", "/etc/webhook/certs/key.pem", "Location of TLS key file.")
 	flag.BoolVar(&enableTLS, "enable-tls", true, "Enable TLS.")
-	flag.StringVar(&cfg.SidecarImage, "sidecar-image", "840364872350.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.11.2.0-prod", "Envoy sidecar container image.")
+	flag.StringVar(&cfg.SidecarImage, "sidecar-image", "840364872350.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.12.0.0-prod", "Envoy sidecar container image.")
 	flag.StringVar(&cfg.SidecarCpu, "sidecar-cpu-requests", "10m", "Envoy sidecar CPU resources requests.")
 	flag.StringVar(&cfg.SidecarMemory, "sidecar-memory-requests", "32Mi", "Envoy sidecar memory resources requests.")
 	flag.StringVar(&cfg.InitImage, "init-image", "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2", "Init container image.")

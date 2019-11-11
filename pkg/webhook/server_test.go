@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -121,14 +122,129 @@ const admissionReview = `
 }
 `
 
-func mockServer() *Server {
-	cfg := config.Config{
-		Port:     8080,
-		MeshName: "global",
-		Region:   "us-west-2",
-		LogLevel: "debug",
-	}
+const admissionReviewTemplate = `
+{
+  "kind": "AdmissionReview",
+  "apiVersion": "admission.k8s.io/v1beta1",
+  "request": {
+    "uid": "53ad2101-497a-11e9-960e-0edb66a862f2",
+    "kind": {
+      "group": "",
+      "version": "v1",
+      "kind": "Pod"
+    },
+    "resource": {
+      "group": "",
+      "version": "v1",
+      "resource": "pods"
+    },
+    "namespace": "test",
+    "operation": "CREATE",
+    "userInfo": {
+      "username": "system:unsecured",
+      "groups": [
+        "system:masters",
+        "system:authenticated"
+      ]
+    },
+    "object": {
+      "metadata": {
+        "generateName": "podinfo-7c45b75c87-",
+        "creationTimestamp": null,
+        "labels": {
+          "app": "podinfo",
+          "pod-template-hash": "3701631743"
+        },
+        "annotations": {
+          "appmesh.k8s.aws/ports": "9898",
+          "appmesh.k8s.aws/egress_ignored_ports": "22",
+          "appmesh.k8s.aws/virtualNode": "podinfo",
+          "appmesh.k8s.aws/sidecarInjectorWebhook": "%v"
+        }
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "default-token-xhfkr",
+            "secret": {
+              "secretName": "default-token-xhfkr"
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "podinfod",
+            "image": "quay.io/stefanprodan/podinfo:1.4.0",
+            "command": [
+              "./podinfo",
+              "--port=9898"
+            ],
+            "ports": [
+              {
+                "name": "http",
+                "containerPort": 9898,
+                "protocol": "TCP"
+              }
+            ],
+            "volumeMounts": [
+              {
+                "name": "default-token-xhfkr",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0
+      },
+      "status": {}
+    },
+    "oldObject": null
+  }
+}
+`
 
+var defaultServerConfig = config.Config{
+	Port:          8080,
+	MeshName:      "global",
+	Region:        "us-west-2",
+	LogLevel:      "debug",
+	InjectDefault: true,
+}
+
+var optInServerConfig = config.Config{
+	Port:          8080,
+	MeshName:      "global",
+	Region:        "us-west-2",
+	LogLevel:      "debug",
+	InjectDefault: false,
+}
+
+func mockServerWithConfig(cfg config.Config) *Server {
 	scheme := runtime.NewScheme()
 	corev1.AddToScheme(scheme)
 	admissionregistrationv1beta1.AddToScheme(scheme)
@@ -153,10 +269,14 @@ func mockServer() *Server {
 	}
 }
 
-func TestServer_Inject(t *testing.T) {
-	srv := mockServer()
+func mockServer() *Server {
+	return mockServerWithConfig(defaultServerConfig)
+}
 
-	req, err := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(admissionReview)))
+func sendWebhook(t *testing.T, cfg config.Config, admissionPayload string) *httptest.ResponseRecorder {
+	srv := mockServerWithConfig(cfg)
+
+	req, err := http.NewRequest("POST", "/", bytes.NewBuffer([]byte(admissionPayload)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,8 +293,94 @@ func TestServer_Inject(t *testing.T) {
 			status, http.StatusOK)
 	}
 
+	return rr
+}
+
+func getAdmissionReviewPayload(sidecarInjectorWebhookEnabled string) string {
+	return fmt.Sprintf(admissionReviewTemplate, sidecarInjectorWebhookEnabled)
+}
+
+func containsPatch(rrBody string) bool {
+	return strings.Contains(rrBody, "\"patchType\":\"JSONPatch\"")
+}
+
+func TestServer_Inject(t *testing.T) {
+	rr := sendWebhook(t, defaultServerConfig, admissionReview)
+
 	if !strings.Contains(rr.Body.String(), "\"allowed\":true") {
 		t.Errorf("handler returned wrong result")
+	}
+}
+
+func TestServer_Inject_OptIn_WithoutAnnotation(t *testing.T) {
+	rr := sendWebhook(t, optInServerConfig, admissionReview)
+
+	rrBody := rr.Body.String()
+	if containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to not patch payload (got %v)", rrBody))
+	}
+}
+
+func TestServer_Inject_OptIn_WithDisabledAnnotation(t *testing.T) {
+	rr := sendWebhook(t, optInServerConfig, getAdmissionReviewPayload("disabled"))
+
+	rrBody := rr.Body.String()
+	if containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to not patch payload (got %v)", rrBody))
+	}
+}
+
+func TestServer_Inject_OptIn_WithEnabledAnnotation(t *testing.T) {
+	rr := sendWebhook(t, optInServerConfig, getAdmissionReviewPayload("enabled"))
+
+	rrBody := rr.Body.String()
+	if !containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to patch payload (got %v)", rrBody))
+	}
+}
+
+func TestServer_Inject_OptIn_WithInvalidAnnotation(t *testing.T) {
+	rr := sendWebhook(t, optInServerConfig, getAdmissionReviewPayload("invalid"))
+
+	rrBody := rr.Body.String()
+	if containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to not patch payload (got %v)", rrBody))
+	}
+}
+
+func TestServer_Inject_OptOut_WithoutAnnotation(t *testing.T) {
+	rr := sendWebhook(t, defaultServerConfig, admissionReview)
+
+	rrBody := rr.Body.String()
+	if !containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to patch payload (got %v)", rrBody))
+	}
+}
+
+func TestServer_Inject_OptOut_WithEnabledAnnotation(t *testing.T) {
+	rr := sendWebhook(t, defaultServerConfig, getAdmissionReviewPayload("enabled"))
+
+	rrBody := rr.Body.String()
+	if !containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to patch payload (got %v)", rrBody))
+	}
+}
+
+func TestServer_Inject_OptOut_WithDisabledAnnotation(t *testing.T) {
+	rr := sendWebhook(t, defaultServerConfig, getAdmissionReviewPayload("disabled"))
+
+	rrBody := rr.Body.String()
+	if containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to not patch payload (got %v)", rrBody))
+	}
+}
+
+func TestServer_Inject_OptOut_WithInvalidAnnotation(t *testing.T) {
+	rr := sendWebhook(t, defaultServerConfig, getAdmissionReviewPayload("invalid"))
+
+	rrBody := rr.Body.String()
+	if !containsPatch(rrBody) {
+		t.Errorf(fmt.Sprintf("expected handler to patch payload (got %v)", rrBody))
 	}
 }
 
@@ -194,5 +400,41 @@ func TestServer_Health(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
+	}
+}
+
+func TestServer_convertAnnotation_enabled(t *testing.T) {
+	srv := mockServer()
+	inject, err := srv.convertAnnotation("enabled")
+
+	if err != nil {
+		t.Errorf("expected err to be nil (got %v)", err)
+	}
+
+	if inject != true {
+		t.Errorf("expected inject to be true (got %v)", inject)
+	}
+}
+
+func TestServer_convertAnnotation_disabled(t *testing.T) {
+	srv := mockServer()
+	inject, err := srv.convertAnnotation("disabled")
+
+	if err != nil {
+		t.Errorf("expected err to be nil (got %v)", err)
+	}
+
+	if inject != false {
+		t.Errorf("expected inject to be false (got %v)", inject)
+	}
+}
+
+func TestServer_convertAnnotation_invalid(t *testing.T) {
+	srv := mockServer()
+	srv.Config.InjectDefault = true
+	_, err := srv.convertAnnotation("invalid")
+
+	if err == nil {
+		t.Errorf("expected err not to be nil (got %v)", err)
 	}
 }

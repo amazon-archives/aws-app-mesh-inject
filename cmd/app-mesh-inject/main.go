@@ -69,6 +69,7 @@ func init() {
 	flag.BoolVar(&cfg.EnableStatsTags, "enable-stats-tags", false, "Enable Envoy to tag stats")
 	flag.BoolVar(&cfg.EnableStatsD, "enable-statsd", false, "If enabled, Envoy will send DogStatsD metrics to 127.0.0.1:8125")
 	flag.BoolVar(&cfg.InjectStatsDExporterSidecar, "inject-statsd-exporter-sidecar", false, "This flag is deprecated and does nothing")
+	flag.BoolVar(&cfg.InjectDefault, "inject-default", true, "If enabled, sidecars will be injected in the absence of the corresponding pod annotation")
 }
 
 func main() {

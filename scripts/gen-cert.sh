@@ -3,8 +3,8 @@
 set -e
 set -o pipefail
 
-title="aws-app-mesh-inject"
-namespace="appmesh-inject"
+title="appmesh-inject"
+namespace="appmesh-system"
 
 csrName=${title}.${namespace}
 tmpdir=$(mktemp -d)

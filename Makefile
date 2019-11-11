@@ -63,10 +63,10 @@ deploy:
 	./scripts/deployInjector.sh
 
 clean:
-	kubectl delete namespace appmesh-inject
-	kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject
-	kubectl delete clusterrolebindings aws-app-mesh-inject-binding
-	kubectl delete clusterrole aws-app-mesh-inject-cr;
+	kubectl delete namespace appmesh-system
+	kubectl delete mutatingwebhookconfiguration appmesh-inject
+	kubectl delete clusterrolebindings appmesh-inject
+	kubectl delete clusterrole appmesh-inject;
 	rm -rf ./_output
 
 #
@@ -79,13 +79,13 @@ ecrsecrets:
 		--output text --query 'authorizationData[].authorizationToken'| \
 		base64 -D | \
 		cut -d: -f2))
-	kubectl delete secret --ignore-not-found inject-ecr-secret -n aws-app-mesh-inject
-	@kubectl create secret docker-registry inject-ecr-secret -n aws-app-mesh-inject\
+	kubectl delete secret --ignore-not-found inject-ecr-secret -n appmesh-system
+	@kubectl create secret docker-registry inject-ecr-secret -n appmesh-system\
 	 --docker-server=https://${REPO} \
 	 --docker-username=AWS \
 	 --docker-password="${TOKEN}" \
 	 --docker-email="to-be@deprecated.com"
-	kubectl patch deployment aws-app-mesh-inject -n aws-app-mesh-inject -p '$(shell cat ecr-secret-patch.json)'
+	kubectl patch deployment appmesh-inject -n appmesh-system -p '$(shell cat ecr-secret-patch.json)'
 
 nssecrets:
 	$(eval export TOKEN=$(shell aws ecr get-authorization-token --region us-west-2 \

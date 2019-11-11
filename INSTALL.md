@@ -58,8 +58,8 @@ mymesh.yaml
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: aws-app-mesh-inject
-  namespace: appmesh-inject
+  name: appmesh-inject
+  namespace: appmesh-system
 spec:
   template:
     spec:
@@ -156,9 +156,9 @@ curl https://raw.githubusercontent.com/aws/aws-app-mesh-inject/master/scripts/in
 Wait for the sidecar injector to deploy.
 
 ```bash
-kubectl get pods -n appmesh-inject
+kubectl get pods -n appmesh-system
 NAME                                   READY   STATUS    RESTARTS   AGE
-aws-app-mesh-inject-5bb846958c-j5v24   1/1     Running   0          24s
+appmesh-inject-5bb846958c-j5v24   1/1     Running   0          24s
 ```
 
 Return to [Under the hood](../README.md#under-the-hood) for more information on how to use the sidecar injector.
@@ -167,7 +167,7 @@ Return to [Under the hood](../README.md#under-the-hood) for more information on 
 
 To cleanup you can run
 ```
-kubectl delete namespace appmesh-inject; kubectl delete mutatingwebhookconfiguration aws-app-mesh-inject;
-kubectl delete clusterrolebindings aws-app-mesh-inject-binding; kubectl delete clusterrole aws-app-mesh-inject-cr;
+kubectl delete namespace appmesh-system; kubectl delete mutatingwebhookconfiguration appmesh-inject;
+kubectl delete clusterrolebindings appmesh-inject; kubectl delete clusterrole appmesh-inject;
 ```
 

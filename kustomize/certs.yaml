@@ -2,7 +2,7 @@ apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:
   name: selfsigned
-  namespace: appmesh-inject
+  namespace: appmesh-system
 spec:
   selfSigned: {}
 ---
@@ -10,17 +10,17 @@ apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
   name: inject-cert
-  namespace: appmesh-inject
+  namespace: appmesh-system
 spec:
   isCA: false
   dnsNames:
-    - aws-app-mesh-inject
-    - aws-app-mesh-inject.appmesh-inject
-    - aws-app-mesh-inject.appmesh-inject.svc
+    - appmesh-inject
+    - appmesh-inject.appmesh-system
+    - appmesh-inject.appmesh-system.svc
   keyAlgorithm: rsa
   usages:
     - "digital signature"
     - "key encipherment"
-  secretName: appmesh-inject-cert-tls
+  secretName: appmesh-inject
   issuerRef:
     name: selfsigned

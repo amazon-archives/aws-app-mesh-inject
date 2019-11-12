@@ -62,9 +62,9 @@ const injectJaegerTemplate = `
 }
 `
 
-const configVolume = `
+const tracingConfigVolume = `
 {
-  "name": "config",
+  "name": "envoy-tracing-config",
   "emptyDir": {}
 }
 `
@@ -145,5 +145,5 @@ func escapeYaml(yaml string) (string, error) {
 
 // shared volume between the init container and Envoy
 func renderJaegerConfigVolume() string {
-	return configVolume
+	return tracingConfigVolume
 }

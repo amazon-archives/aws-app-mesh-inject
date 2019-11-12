@@ -119,5 +119,5 @@ func renderDatadogInitContainer(address string, port string) (string, error) {
 
 // shared volume between the init container and Envoy
 func renderDatadogConfigVolume() string {
-	return configVolume
+	return tracingConfigVolume
 }

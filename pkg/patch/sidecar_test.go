@@ -150,7 +150,7 @@ func checkEnvoy(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 
 		mount := mounts[0].(map[string]interface{})
 		mountName := mount["name"].(string)
-		expectedMountName := "config"
+		expectedMountName := "envoy-tracing-config"
 		if mountName != expectedMountName {
 			t.Errorf("volume mount name is set to %s instead of %s", mountName, expectedMountName)
 		}

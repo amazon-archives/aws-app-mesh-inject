@@ -6,9 +6,12 @@ import (
 )
 
 const (
-	ecrSecret = `{"name": "appmesh-ecr-secret"}`
-	create    = `{"op":"add","path":"/spec/%v", "value": [%v]}`
-	add       = `{"op":"add","path":"/spec/%v/-", "value": %v}`
+	ecrSecret            = `{"name": "appmesh-ecr-secret"}`
+	create               = `{"op":"add","path":"/spec/%v", "value": [%v]}`
+	add                  = `{"op":"add","path":"/spec/%v/-", "value": %v}`
+	createAnnotation     = `{"op":"add","path":"/metadata/annotations","value":{"%s": "%s"}}`
+	updateAnnotation     = `{"op":"%s","path":"/metadata/annotations/%s","value":"%s"}`
+	appmeshCNIAnnotation = "appmesh.k8s.aws/appmeshCNI"
 )
 
 type Meta struct {
@@ -18,20 +21,32 @@ type Meta struct {
 	HasImagePullSecret    bool
 	Init                  InitMeta
 	Sidecar               SidecarMeta
+	PodAnnotations        map[string]string
 }
 
 func GeneratePatch(meta Meta) ([]byte, error) {
+	var patches []string
+
 	var patch string
 
-	initPatch, err := renderInit(meta.Init)
-	if err != nil {
-		return []byte(patch), err
+	var appmeshCNIEnabled bool
+	if v, ok := meta.PodAnnotations[appmeshCNIAnnotation]; ok {
+		appmeshCNIEnabled = (v == "enabled")
 	}
-
-	if meta.AppendInit {
-		initPatch = fmt.Sprintf(add, "initContainers", initPatch)
+	if appmeshCNIEnabled {
+		patches = append(patches, appMeshCNIAnnotationsPatch(meta)...)
 	} else {
-		initPatch = fmt.Sprintf(create, "initContainers", initPatch)
+		initPatch, err := renderInit(meta.Init)
+		if err != nil {
+			return []byte(patch), err
+		}
+
+		if meta.AppendInit {
+			initPatch = fmt.Sprintf(add, "initContainers", initPatch)
+		} else {
+			initPatch = fmt.Sprintf(create, "initContainers", initPatch)
+		}
+		patches = append(patches, initPatch)
 	}
 
 	var sidecarPatches []string
@@ -50,8 +65,6 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		sidecarPatches = append(sidecarPatches, fmt.Sprintf(create, "containers", strings.Join(sidecars, ",")))
 	}
 
-	var patches []string
-	patches = append(patches, initPatch)
 	patches = append(patches, sidecarPatches...)
 	if meta.HasImagePullSecret {
 		var ecrPatch string
@@ -96,4 +109,36 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 	fmt.Println(patches)
 
 	return []byte(fmt.Sprintf("[%s]", strings.Join(patches, ","))), nil
+}
+
+func appMeshCNIAnnotationsPatch(meta Meta) []string {
+	newAnnotations := map[string]string{
+		"appmesh.k8s.aws/egressIgnoredIPs":   meta.Init.IgnoredIPs,
+		"appmesh.k8s.aws/egressIgnoredPorts": meta.Init.EgressIgnoredPorts,
+		"appmesh.k8s.aws/ports":              meta.Init.Ports,
+	}
+	return annotationsPatches(meta.PodAnnotations, newAnnotations)
+}
+
+func annotationsPatches(existingAnnotations map[string]string, newAnnotations map[string]string) (patches []string) {
+	for key, value := range newAnnotations {
+		if existingAnnotations == nil {
+			//first one will be create, subsequent will be updates
+			existingAnnotations = map[string]string{}
+			patches = append(patches, fmt.Sprintf(createAnnotation, key, value))
+		} else {
+			op := "add"
+			if existingAnnotations[key] != "" {
+				op = "replace"
+			}
+			patches = append(patches, fmt.Sprintf(updateAnnotation, op, escapeJSONPointer(key), value))
+		}
+	}
+
+	return patches
+}
+
+func escapeJSONPointer(key string) string {
+	s0 := strings.ReplaceAll(key, "~", "~0")
+	return strings.ReplaceAll(s0, "/", "~1")
 }

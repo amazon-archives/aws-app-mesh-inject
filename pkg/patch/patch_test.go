@@ -115,6 +115,7 @@ func TestGeneratePatch_AppendSidecarTrue_WithAppMeshCNI(t *testing.T) {
 		t.Fatal("invalid json")
 	}
 
+	verifyAppMeshCNIAnnotationsPatch(t, string(patch))
 	verifyPatch(t, string(patch), meta)
 }
 

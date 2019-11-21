@@ -52,7 +52,7 @@ const admissionReview = `
         },
         "annotations": {
           "appmesh.k8s.aws/ports": "9898",
-          "appmesh.k8s.aws/egress_ignored_ports": "22",
+          "appmesh.k8s.aws/egressIgnoredPorts": "22",
           "appmesh.k8s.aws/virtualNode": "podinfo"
         }
       },
@@ -157,7 +157,7 @@ const admissionReviewTemplate = `
         },
         "annotations": {
           "appmesh.k8s.aws/ports": "9898",
-          "appmesh.k8s.aws/egress_ignored_ports": "22",
+          "appmesh.k8s.aws/egressIgnoredPorts": "22",
           "appmesh.k8s.aws/virtualNode": "podinfo",
           "appmesh.k8s.aws/sidecarInjectorWebhook": "%v"
         }

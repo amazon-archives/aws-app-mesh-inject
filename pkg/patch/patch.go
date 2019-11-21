@@ -3,15 +3,16 @@ package patch
 import (
 	"fmt"
 	"strings"
+
+	"github.com/aws/aws-app-mesh-inject/pkg/config"
 )
 
 const (
-	ecrSecret            = `{"name": "appmesh-ecr-secret"}`
-	create               = `{"op":"add","path":"/spec/%v", "value": [%v]}`
-	add                  = `{"op":"add","path":"/spec/%v/-", "value": %v}`
-	createAnnotation     = `{"op":"add","path":"/metadata/annotations","value":{"%s": "%s"}}`
-	updateAnnotation     = `{"op":"%s","path":"/metadata/annotations/%s","value":"%s"}`
-	appmeshCNIAnnotation = "appmesh.k8s.aws/appmeshCNI"
+	ecrSecret        = `{"name": "appmesh-ecr-secret"}`
+	create           = `{"op":"add","path":"/spec/%v", "value": [%v]}`
+	add              = `{"op":"add","path":"/spec/%v/-", "value": %v}`
+	createAnnotation = `{"op":"add","path":"/metadata/annotations","value":{"%s": "%s"}}`
+	updateAnnotation = `{"op":"%s","path":"/metadata/annotations/%s","value":"%s"}`
 )
 
 type Meta struct {
@@ -30,7 +31,7 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 	var patch string
 
 	var appmeshCNIEnabled bool
-	if v, ok := meta.PodAnnotations[appmeshCNIAnnotation]; ok {
+	if v, ok := meta.PodAnnotations[config.AppMeshCNIAnnotation]; ok {
 		appmeshCNIEnabled = (v == "enabled")
 	}
 	if appmeshCNIEnabled {
@@ -113,9 +114,14 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 
 func appMeshCNIAnnotationsPatch(meta Meta) []string {
 	newAnnotations := map[string]string{
-		"appmesh.k8s.aws/egressIgnoredIPs":   meta.Init.IgnoredIPs,
-		"appmesh.k8s.aws/egressIgnoredPorts": meta.Init.EgressIgnoredPorts,
-		"appmesh.k8s.aws/ports":              meta.Init.Ports,
+		config.AppMeshEgressIgnoredIPsAnnotation:   meta.Init.IgnoredIPs,
+		config.AppMeshEgressIgnoredPortsAnnotation: meta.Init.EgressIgnoredPorts,
+		config.AppMeshPortsAnnotation:              meta.Init.Ports,
+		config.AppMeshSidecarInjectAnnotation:      "enabled",
+		//Below settings are fixed as per current App Mesh runtime behavior
+		config.AppMeshIgnoredUIDAnnotation:       config.AppMeshProxyUID,
+		config.AppMeshProxyEgressPortAnnotation:  config.AppMeshProxyEgressPort,
+		config.AppMeshProxyIngressPortAnnotation: config.AppMeshProxyIngressPort,
 	}
 	return annotationsPatches(meta.PodAnnotations, newAnnotations)
 }

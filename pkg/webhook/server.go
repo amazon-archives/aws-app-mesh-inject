@@ -24,18 +24,10 @@ import (
 )
 
 var (
-	ErrNoUID                     = errors.New("No UID from request")
-	ErrNoPorts                   = errors.New("No ports specified for injection, doing nothing")
-	ErrNoName                    = errors.New("No VirtualNode name specified for injection, doing nothing")
-	ErrNoObject                  = errors.New("No Object passed to mutate")
-	meshNameAnnotation           = "appmesh.k8s.aws/mesh"
-	portsAnnotation              = "appmesh.k8s.aws/ports"
-	egressIgnoredPortsAnnotation = "appmesh.k8s.aws/egressIgnoredPorts"
-	cpuRequestAnnotation         = "appmesh.k8s.aws/cpuRequest"
-	memoryRequestAnnotation      = "appmesh.k8s.aws/memoryRequest"
-	virtualNodeNameAnnotation    = "appmesh.k8s.aws/virtualNode"
-	sidecarInjectAnnotation      = "appmesh.k8s.aws/sidecarInjectorWebhook"
-	previewAnnotation            = "appmesh.k8s.aws/preview"
+	ErrNoUID    = errors.New("No UID from request")
+	ErrNoPorts  = errors.New("No ports specified for injection, doing nothing")
+	ErrNoName   = errors.New("No VirtualNode name specified for injection, doing nothing")
+	ErrNoObject = errors.New("No Object passed to mutate")
 )
 
 type Server struct {
@@ -184,19 +176,19 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 
 	// set mesh name
 	meshName := s.Config.MeshName
-	if v, ok := pod.ObjectMeta.Annotations[meshNameAnnotation]; ok {
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshMeshNameAnnotation]; ok {
 		meshName = v
 	}
 
 	// set egress ignored ports
-	if v, ok := pod.ObjectMeta.Annotations[egressIgnoredPortsAnnotation]; ok {
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshEgressIgnoredPortsAnnotation]; ok {
 		egressIgnoredPorts = v
 	} else {
 		egressIgnoredPorts = "22"
 	}
 
 	// set ports
-	if v, ok := pod.ObjectMeta.Annotations[portsAnnotation]; ok {
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshPortsAnnotation]; ok {
 		ports = v
 	} else {
 		// if ports isn't specified in the pod annotation, use the container ports from the pod spec.
@@ -210,7 +202,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 	}
 
 	// set virtual node name
-	if v, ok := pod.ObjectMeta.Annotations[virtualNodeNameAnnotation]; ok {
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshVirtualNodeNameAnnotation]; ok {
 		name = v
 	} else {
 		// if virtual router name isn't specified in the pod annotation, use the controller owner name instead.
@@ -225,7 +217,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 
 	// set preview channel enabled
 	var preview string
-	if v, ok := pod.ObjectMeta.Annotations[previewAnnotation]; ok {
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshPreviewAnnotation]; ok {
 		if v == "true" {
 			preview = "1"
 		} else {
@@ -241,7 +233,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 
 	// set cpu-request
 	var cpuRequest string
-	if v, ok := pod.ObjectMeta.Annotations[cpuRequestAnnotation]; ok {
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshCpuRequestAnnotation]; ok {
 		cpuRequest = v
 	} else {
 		cpuRequest = s.Config.SidecarCpu
@@ -249,7 +241,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 
 	// set memory-request
 	var memoryRequest string
-	if v, ok := pod.ObjectMeta.Annotations[memoryRequestAnnotation]; ok {
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshMemoryRequestAnnotation]; ok {
 		memoryRequest = v
 	} else {
 		memoryRequest = s.Config.SidecarMemory
@@ -307,14 +299,14 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 // Determines if the sidecars should be injected or not
 func (s *Server) shouldInject(pod corev1.Pod) (bool, error) {
 	// If sidecar injection is explicitely set in the annotation, honor it
-	sidecarInjection := strings.ToLower(pod.ObjectMeta.Annotations[sidecarInjectAnnotation])
+	sidecarInjection := strings.ToLower(pod.ObjectMeta.Annotations[config.AppMeshSidecarInjectAnnotation])
 	if sidecarInjection != "" {
 		inject, err := s.convertAnnotation(sidecarInjection)
 		if err != nil {
 			klog.Warning(fmt.Sprintf("Error converting annotation: %v for pod %v/%v. Using default injection value", err, pod.GetNamespace(), pod.GetName()))
 			inject = s.Config.InjectDefault
 		}
-		klog.Info(fmt.Sprintf("Sidecar inject is %v in %v for pod %v/%v", inject, sidecarInjectAnnotation, pod.GetNamespace(), pod.GetName()))
+		klog.Info(fmt.Sprintf("Sidecar inject is %v in %v for pod %v/%v", inject, config.AppMeshSidecarInjectAnnotation, pod.GetNamespace(), pod.GetName()))
 		return inject, nil
 	}
 
@@ -330,7 +322,7 @@ func (s *Server) convertAnnotation(annotation string) (bool, error) {
 	case "disabled":
 		return false, nil
 	default:
-		return false, fmt.Errorf("Invalid %v annotation: %v", sidecarInjectAnnotation, annotation)
+		return false, fmt.Errorf("Invalid %v annotation: %v", config.AppMeshSidecarInjectAnnotation, annotation)
 	}
 }
 

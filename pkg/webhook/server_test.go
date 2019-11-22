@@ -256,7 +256,7 @@ func mockServerWithConfig(cfg config.Config) *Server {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test",
 			Labels: map[string]string{
-				sidecarInjectAnnotation: "enabled",
+				config.AppMeshSidecarInjectAnnotation: "enabled",
 			},
 		},
 	}

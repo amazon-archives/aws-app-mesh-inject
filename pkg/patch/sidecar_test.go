@@ -178,6 +178,26 @@ func checkEnvoy(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 		t.Errorf("Envoy container image is not set to %s", meta.ContainerImage)
 	}
 
+	checkEnv(t, m, expectedEnvs)
+}
+
+func checkXrayDaemon(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
+	if !meta.InjectXraySidecar {
+		t.Errorf("Xray daemon is added when InjectXraySidecar is false")
+	}
+
+	if m["image"] != "amazon/aws-xray-daemon" {
+		t.Errorf("Xray daemon container image is not set to amazon/aws-xray-daemon")
+	}
+
+	expectedEnvs := map[string]string{
+		"AWS_REGION": meta.Region,
+	}
+
+	checkEnv(t, m, expectedEnvs)
+}
+
+func checkEnv(t *testing.T, m map[string]interface{}, expectedEnvs map[string]string) {
 	envs := m["env"].([]interface{})
 	for _, u := range envs {
 		item := u.(map[string]interface{})
@@ -194,15 +214,5 @@ func checkEnvoy(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
 
 	for k := range expectedEnvs {
 		t.Errorf("%s env is not set", k)
-	}
-}
-
-func checkXrayDaemon(t *testing.T, m map[string]interface{}, meta SidecarMeta) {
-	if !meta.InjectXraySidecar {
-		t.Errorf("Xray daemon is added when InjectXraySidecar is false")
-	}
-
-	if m["image"] != "amazon/aws-xray-daemon" {
-		t.Errorf("Xray daemon container image is not set to amazon/aws-xray-daemon")
 	}
 }

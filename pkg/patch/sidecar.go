@@ -82,6 +82,12 @@ const xrayDaemonContainerTemplate = `
       "protocol": "UDP"
     }
   ],
+  "env": [
+    {
+      "name": "AWS_REGION",
+      "value": "{{ .Region }}"
+    }
+  ],
   "resources": {
     "requests": {
       "cpu": "{{ .CpuRequests }}",

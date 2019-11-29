@@ -46,7 +46,7 @@ const injectJaegerTemplate = `
   "volumeMounts": [
   	{
       "mountPath": "/tmp/envoy",
-      "name": "config"
+      "name": "envoy-tracing-config"
     }
   ],
   "resources": {

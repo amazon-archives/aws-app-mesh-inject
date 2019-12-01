@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.3.1
+
+### Summary
+
+Patch release fixing a bug with the config dir location for injected tracing config for envoy.
+
+### Changes
+
+* Cherry pick of b69d6da: Rename config dir to envoy-tracing-config ([#108](https://github.com/aws/aws-app-mesh-inject/pull/108), @nckturner)
+
 ## v0.3.0
 
 ### Summary

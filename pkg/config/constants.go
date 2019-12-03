@@ -1,6 +1,8 @@
 package config
 
 const (
+	//Pod Annotations
+
 	//AppMeshCNIAnnotation specifies that CNI will be used to configure traffic interception
 	AppMeshCNIAnnotation = "appmesh.k8s.aws/appmeshCNI"
 	//AppMeshCpuRequestAnnotation specifies the CPU requests for proxy
@@ -29,6 +31,11 @@ const (
 	AppMeshSidecarInjectAnnotation = "appmesh.k8s.aws/sidecarInjectorWebhook"
 	//AppMeshVirtualNodeNameAnnotation specifies the App Mesh VirtualNode used by proxy
 	AppMeshVirtualNodeNameAnnotation = "appmesh.k8s.aws/virtualNode"
+
+	//Pod Labels
+
+	//FargateProfileLabel is added by fargate-scheduler when pod is running on AWS Fargate
+	FargateProfileLabel = "eks.amazonaws.com/fargate-profile"
 
 	// Fixed proxy container configuration required by App Mesh
 

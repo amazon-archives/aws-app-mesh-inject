@@ -251,7 +251,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 
 	// patch pod spec
 	podPatch, err := patch.GeneratePatch(patch.Meta{
-		PodAnnotations:        pod.ObjectMeta.Annotations,
+		PodMetadata:           pod.ObjectMeta,
 		HasImagePullSecret:    s.Config.EcrSecret,
 		AppendImagePullSecret: len(pod.Spec.ImagePullSecrets) > 0,
 		AppendInit:            len(pod.Spec.InitContainers) > 0,

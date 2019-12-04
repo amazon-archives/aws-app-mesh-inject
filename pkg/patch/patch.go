@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-app-mesh-inject/pkg/config"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -22,24 +23,19 @@ type Meta struct {
 	HasImagePullSecret    bool
 	Init                  InitMeta
 	Sidecar               SidecarMeta
-	PodAnnotations        map[string]string
+	PodMetadata           metav1.ObjectMeta
 }
 
 func GeneratePatch(meta Meta) ([]byte, error) {
 	var patches []string
+	var emptyPatch []byte
 
-	var patch string
-
-	var appmeshCNIEnabled bool
-	if v, ok := meta.PodAnnotations[config.AppMeshCNIAnnotation]; ok {
-		appmeshCNIEnabled = (v == "enabled")
-	}
-	if appmeshCNIEnabled {
+	if isAppMeshCNIEnabled(meta) {
 		patches = append(patches, appMeshCNIAnnotationsPatch(meta)...)
 	} else {
 		initPatch, err := renderInit(meta.Init)
 		if err != nil {
-			return []byte(patch), err
+			return emptyPatch, err
 		}
 
 		if meta.AppendInit {
@@ -53,7 +49,7 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 	var sidecarPatches []string
 	sidecars, err := renderSidecars(meta.Sidecar)
 	if err != nil {
-		return []byte(patch), err
+		return emptyPatch, err
 	}
 
 	if meta.AppendSidecar {
@@ -85,7 +81,7 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		// add an init container that writes the Envoy static config to the empty dir volume
 		datadogInit, err := renderDatadogInitContainer(meta.Sidecar.DatadogAddress, meta.Sidecar.DatadogPort)
 		if err != nil {
-			return []byte(patch), err
+			return emptyPatch, err
 		}
 
 		j := fmt.Sprintf(add, "initContainers", datadogInit)
@@ -100,7 +96,7 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 		// add an init container that writes the Envoy static config to the empty dir volume
 		jaegerInit, err := renderJaegerInitContainer(meta.Sidecar.JaegerAddress, meta.Sidecar.JaegerPort)
 		if err != nil {
-			return []byte(patch), err
+			return emptyPatch, err
 		}
 
 		j := fmt.Sprintf(add, "initContainers", jaegerInit)
@@ -123,7 +119,7 @@ func appMeshCNIAnnotationsPatch(meta Meta) []string {
 		config.AppMeshProxyEgressPortAnnotation:  config.AppMeshProxyEgressPort,
 		config.AppMeshProxyIngressPortAnnotation: config.AppMeshProxyIngressPort,
 	}
-	return annotationsPatches(meta.PodAnnotations, newAnnotations)
+	return annotationsPatches(meta.PodMetadata.Annotations, newAnnotations)
 }
 
 func annotationsPatches(existingAnnotations map[string]string, newAnnotations map[string]string) (patches []string) {
@@ -147,4 +143,15 @@ func annotationsPatches(existingAnnotations map[string]string, newAnnotations ma
 func escapeJSONPointer(key string) string {
 	s0 := strings.ReplaceAll(key, "~", "~0")
 	return strings.ReplaceAll(s0, "/", "~1")
+}
+
+func isAppMeshCNIEnabled(meta Meta) bool {
+	if v, ok := meta.PodMetadata.Annotations[config.AppMeshCNIAnnotation]; ok {
+		return v == "enabled"
+	}
+	//Fargate platform has appmesh-cni enabled by default
+	if v, ok := meta.PodMetadata.Labels[config.FargateProfileLabel]; ok {
+		return len(v) > 0
+	}
+	return false
 }

@@ -108,6 +108,11 @@ func TestGeneratePatch_AppendSidecarTrue_WithFargateProfile(t *testing.T) {
 			Labels: map[string]string{
 				config.FargateProfileLabel: "some-profile",
 			},
+			Annotations: map[string]string{
+				config.AppMeshEgressIgnoredPortsAnnotation: "3306",
+				config.AppMeshEgressIgnoredIPsAnnotation:   "169.254.169.254",
+				config.AppMeshPortsAnnotation:              "8080",
+			},
 		},
 	}
 
@@ -149,7 +154,10 @@ func TestGeneratePatch_AppendSidecarTrue_WithAppMeshCNI(t *testing.T) {
 		},
 		PodMetadata: metav1.ObjectMeta{
 			Annotations: map[string]string{
-				"appmesh.k8s.aws/appmeshCNI": "enabled",
+				config.AppMeshCNIAnnotation:                "enabled",
+				config.AppMeshEgressIgnoredPortsAnnotation: "3306",
+				config.AppMeshEgressIgnoredIPsAnnotation:   "169.254.169.254",
+				config.AppMeshPortsAnnotation:              "8080",
 			},
 		},
 	}
@@ -164,6 +172,52 @@ func TestGeneratePatch_AppendSidecarTrue_WithAppMeshCNI(t *testing.T) {
 	}
 
 	verifyAppMeshCNIPatch(t, string(patch))
+	verifyPatch(t, string(patch), meta)
+}
+
+func TestGeneratePatch_AppendSidecarTrue_WithFargateProfileAppMeshCNIDisabled(t *testing.T) {
+	meta := Meta{
+		AppendImagePullSecret: false,
+		HasImagePullSecret:    false,
+		AppendSidecar:         true,
+		AppendInit:            false,
+		Init: InitMeta{
+			Ports:              "80,443",
+			EgressIgnoredPorts: "22",
+			ContainerImage:     "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-proxy-route-manager:v2",
+			IgnoredIPs:         "169.254.169.254",
+		},
+		Sidecar: SidecarMeta{
+			MeshName:          "global",
+			VirtualNodeName:   "podinfo",
+			Region:            "us-west-2",
+			LogLevel:          "debug",
+			ContainerImage:    "111345817488.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:latest",
+			CpuRequests:       "10m",
+			MemoryRequests:    "32Mi",
+			InjectXraySidecar: true,
+			EnableStatsTags:   true,
+		},
+		PodMetadata: metav1.ObjectMeta{
+			Labels: map[string]string{
+				config.FargateProfileLabel: "some-profile",
+			},
+			Annotations: map[string]string{
+				config.AppMeshCNIAnnotation: "disabled",
+			},
+		},
+	}
+
+	patch, err := GeneratePatch(meta)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !json.Valid(patch) {
+		t.Fatal("invalid json")
+	}
+
+	verifyInitContainerPatch(t, string(patch))
 	verifyPatch(t, string(patch), meta)
 }
 

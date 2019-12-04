@@ -1,3 +1,4 @@
 _output
 .vscode
 *.swp
+coverage.out

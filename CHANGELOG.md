@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## v0.4.0
+
+### Summary
+  This version supports EKS-Fargate pods and bumps the default envoy version to v1.12.2
+
+### Changes:
+* Copy attribution doc to image ([#118](https://github.com/aws/aws-app-mesh-inject/pull/118), @nckturner)
+* Update envoy image version to v1.12.2.1-prod ([#115](https://github.com/aws/aws-app-mesh-inject/pull/115), @abaptiste)
+* Revert "Update Envoy image to v1.12.2.0-prod" ([#113](https://github.com/aws/aws-app-mesh-inject/pull/113), @nckturner)
+* Update Envoy image to v1.12.2.0-prod ([#112](https://github.com/aws/aws-app-mesh-inject/pull/112), abaptiste)
+* Support for Amazon EKS on AWS Fargate ([#111](https://github.com/aws/aws-app-mesh-inject/pull/111), @kiranmeduri)
+* Rename config dir to envoy-tracing-config ([#108](https://github.com/aws/aws-app-mesh-inject/pull/108), @nckturner)
+* Update default app mesh envoy sidecar to v1.12.1.1 ([#107](https://github.com/aws/aws-app-mesh-inject/pull/107), @lavignes)
+* Add AWS_REGION env-var to xray-daemon ([#106](https://github.com/aws/aws-app-mesh-inject/pull/106), @kiranmeduri)
+* Propogate additional settings via Pod to CNI in container runtime ([#105](https://github.com/aws/aws-app-mesh-inject/pull/105), @kiranmeduri)
+* Enable CNI to take over netfilter rules setup from init-container ([#104](https://github.com/aws/aws-app-mesh-inject/pull/104), @kiranmeduri)
+
 ## v0.3.1
 
 ### Summary

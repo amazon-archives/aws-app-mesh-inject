@@ -2,6 +2,7 @@ package patch
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -258,5 +259,31 @@ func verifyPatch(t *testing.T, patch string, meta Meta) {
 		if strings.Contains(patch, "amazon/aws-xray-daemon") {
 			t.Errorf("X-Ray container found when InjectXraySidecar=false")
 		}
+	}
+}
+
+func Test_podFSGroupPatch(t *testing.T) {
+	tests := []struct {
+		name    string
+		fsGroup int64
+		want    string
+	}{
+		{
+			name:    "fs_group 1337",
+			fsGroup: 1337,
+			want:    `{"op":"add","path":"/spec/securityContext/fsGroup", "value": 1337}`,
+		},
+		{
+			name:    "fs_group 1338",
+			fsGroup: 1338,
+			want:    `{"op":"add","path":"/spec/securityContext/fsGroup", "value": 1338}`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := podFSGroupPatch(tt.fsGroup); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("fsGroupPatches() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

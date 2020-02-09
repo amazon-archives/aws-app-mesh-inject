@@ -9,6 +9,10 @@ type Config struct {
 	// Injetion Settings
 	InjectDefault bool
 
+	// If enabled, an fsGroup: 1337 will be injected in the absence of it within pod securityContext
+	// see https://github.com/aws/amazon-eks-pod-identity-webhook/issues/8 for more details
+	EnableIAMForServiceAccounts bool
+
 	// Sidecar settings
 	SidecarImage  string
 	SidecarCpu    string

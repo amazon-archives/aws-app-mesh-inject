@@ -16,6 +16,11 @@ const (
 	createAnnotation = `{"op":"add","path":"/metadata/annotations","value":{"%s": "%s"}}`
 	updateAnnotation = `{"op":"%s","path":"/metadata/annotations/%s","value":"%s"}`
 
+	// We don't want to make this configurable since users shouldn't rely on this
+	// feature to set a fsGroup for them. This feature is just to protect innocent 
+	// users that are not aware of the limitation of iam-for-service-accounts:
+	// https://github.com/aws/amazon-eks-pod-identity-webhook/issues/8
+	// Users should set fsGroup on the pod spec directly if a specific fsGroup is desired.
 	defaultFSGroup int64 = 1337
 )
 

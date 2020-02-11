@@ -256,6 +256,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		AppendImagePullSecret: len(pod.Spec.ImagePullSecrets) > 0,
 		AppendInit:            len(pod.Spec.InitContainers) > 0,
 		AppendSidecar:         len(pod.Spec.Containers) > 0,
+		InjectFSGroup:         s.Config.EnableIAMForServiceAccounts && (pod.Spec.SecurityContext == nil || pod.Spec.SecurityContext.FSGroup == nil),
 		Init: patch.InitMeta{
 			Ports:              ports,
 			EgressIgnoredPorts: egressIgnoredPorts,

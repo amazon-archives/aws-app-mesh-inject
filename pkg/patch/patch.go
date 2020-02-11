@@ -11,9 +11,17 @@ import (
 const (
 	ecrSecret        = `{"name": "appmesh-ecr-secret"}`
 	create           = `{"op":"add","path":"/spec/%v", "value": [%v]}`
+	createElement    = `{"op":"add","path":"/spec/%v", "value": %v}`
 	add              = `{"op":"add","path":"/spec/%v/-", "value": %v}`
 	createAnnotation = `{"op":"add","path":"/metadata/annotations","value":{"%s": "%s"}}`
 	updateAnnotation = `{"op":"%s","path":"/metadata/annotations/%s","value":"%s"}`
+
+	// We don't want to make this configurable since users shouldn't rely on this
+	// feature to set a fsGroup for them. This feature is just to protect innocent 
+	// users that are not aware of the limitation of iam-for-service-accounts:
+	// https://github.com/aws/amazon-eks-pod-identity-webhook/issues/8
+	// Users should set fsGroup on the pod spec directly if a specific fsGroup is desired.
+	defaultFSGroup int64 = 1337
 )
 
 type Meta struct {
@@ -21,6 +29,7 @@ type Meta struct {
 	AppendSidecar         bool
 	AppendImagePullSecret bool
 	HasImagePullSecret    bool
+	InjectFSGroup         bool
 	Init                  InitMeta
 	Sidecar               SidecarMeta
 	PodMetadata           metav1.ObjectMeta
@@ -44,6 +53,10 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 			initPatch = fmt.Sprintf(create, "initContainers", initPatch)
 		}
 		patches = append(patches, initPatch)
+	}
+
+	if meta.InjectFSGroup {
+		patches = append(patches, podFSGroupPatch(defaultFSGroup))
 	}
 
 	var sidecarPatches []string
@@ -120,6 +133,11 @@ func appMeshCNIAnnotationsPatch(meta Meta) []string {
 		config.AppMeshProxyIngressPortAnnotation: config.AppMeshProxyIngressPort,
 	}
 	return annotationsPatches(meta.PodMetadata.Annotations, newAnnotations)
+}
+
+func podFSGroupPatch(fsGroup int64) string {
+	patch := fmt.Sprintf(createElement, "securityContext/fsGroup", fsGroup)
+	return patch
 }
 
 func annotationsPatches(existingAnnotations map[string]string, newAnnotations map[string]string) (patches []string) {

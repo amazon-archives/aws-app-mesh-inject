@@ -11,7 +11,7 @@ metadata:
   name: appmesh-inject
 rules:
   - apiGroups: ["*"]
-    resources: ["replicasets"]
+    resources: ["replicasets", "secrets"]
     verbs: ["get"]
 ---
 kind: ClusterRoleBinding

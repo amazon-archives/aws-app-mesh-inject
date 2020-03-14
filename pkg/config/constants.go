@@ -31,6 +31,8 @@ const (
 	AppMeshSidecarInjectAnnotation = "appmesh.k8s.aws/sidecarInjectorWebhook"
 	//AppMeshVirtualNodeNameAnnotation specifies the App Mesh VirtualNode used by proxy
 	AppMeshVirtualNodeNameAnnotation = "appmesh.k8s.aws/virtualNode"
+	//AppMeshSecretMountsAnnotation specifies the list of Secret that need to be mounted to the proxy as a volume
+	AppMeshSecretMountsAnnotation = "appmesh.k8s.aws/secretMounts"
 
 	//Pod Labels
 

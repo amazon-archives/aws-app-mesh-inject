@@ -97,6 +97,11 @@ const xrayDaemonContainerTemplate = `
 }
 `
 
+type SecretMount struct {
+	SecretName string
+	MountPath  string
+}
+
 type SidecarMeta struct {
 	ContainerImage       string
 	MeshName             string
@@ -115,6 +120,7 @@ type SidecarMeta struct {
 	InjectXraySidecar    bool
 	EnableStatsTags      bool
 	EnableStatsD         bool
+	SecretMounts         []SecretMount
 }
 
 func renderSidecars(meta SidecarMeta) ([]string, error) {

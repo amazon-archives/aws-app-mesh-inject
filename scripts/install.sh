@@ -14,7 +14,7 @@
 REPO=${REPO:-aws/aws-app-mesh-inject}
 BRANCH=${BRANCH:-master}
 export MESH_REGION=${MESH_REGION:-us-west-2}
-export VERSION=${VERSION:-v0.4.1}
+export VERSION=${VERSION:-v0.5.0}
 
 set -e
 set -o pipefail

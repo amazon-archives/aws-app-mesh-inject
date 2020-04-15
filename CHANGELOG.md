@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.4.1
+## v0.5.0
   This version sets the default fsGroup to `1337` to allow non-root accounts on EKS-Fargate pods to read token files and updates the default envoy version to v1.12.3
 
 ### Changes:

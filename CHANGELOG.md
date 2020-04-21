@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v0.5.0
+  This version sets the default fsGroup to `1337` to allow non-root accounts on EKS-Fargate pods to read token files and updates the default envoy version to v1.12.3
+
+### Changes:
+* Add `enable-iam-for-service-accounts` to automatically patch fsGroup ([#120](https://github.com/aws/aws-app-mesh-inject/pull/120), @M00nF1sh)
+* Update Envoy sidecar default image version to v1.12.3.0 ([#128](https://github.com/aws/aws-app-mesh-inject/pull/128), @lavignes)
+
 ## v0.4.0
 
 ### Summary

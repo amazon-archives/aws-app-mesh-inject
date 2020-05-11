@@ -247,10 +247,31 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 		memoryRequest = s.Config.SidecarMemory
 	}
 
+	var secretMounts []patch.SecretMount
+	if v, ok := pod.ObjectMeta.Annotations[config.AppMeshSecretMountsAnnotation]; ok {
+		for _, segment := range strings.Split(v, ",") {
+			pair := strings.Split(segment, ":")
+			if len(pair) != 2 {  // secretName:mountPath
+				klog.Warning(fmt.Sprintf("Invalid config in secretMounts annotation: %v for pod %v/%v. " +
+					"Need secretName:mountPath format for each config segment. Skip the segment",
+					segment, pod.GetNamespace(), pod.GetName()))
+				continue
+			}
+
+			secretMount := patch.SecretMount{
+				SecretName: strings.TrimSpace(pair[0]),
+				MountPath:  strings.TrimSpace(pair[1]),
+			}
+
+			secretMounts = append(secretMounts, secretMount)
+		}
+	}
+
 	klog.Infof("Patching pod %v", pod.ObjectMeta)
 
 	// patch pod spec
 	podPatch, err := patch.GeneratePatch(patch.Meta{
+		PodSpec:		 	   pod.Spec,
 		PodMetadata:           pod.ObjectMeta,
 		HasImagePullSecret:    s.Config.EcrSecret,
 		AppendImagePullSecret: len(pod.Spec.ImagePullSecrets) > 0,
@@ -283,6 +304,7 @@ func (s *Server) mutate(receivedAdmissionReview v1beta1.AdmissionReview) *v1beta
 			InjectXraySidecar:    s.Config.InjectXraySidecar,
 			EnableStatsTags:      s.Config.EnableStatsTags,
 			EnableStatsD:         s.Config.EnableStatsD,
+			SecretMounts:         secretMounts,
 		},
 	})
 	if err != nil {

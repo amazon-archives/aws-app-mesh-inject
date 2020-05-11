@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-app-mesh-inject/pkg/config"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,6 +34,7 @@ type Meta struct {
 	Init                  InitMeta
 	Sidecar               SidecarMeta
 	PodMetadata           metav1.ObjectMeta
+	PodSpec               corev1.PodSpec
 }
 
 func GeneratePatch(meta Meta) ([]byte, error) {
@@ -114,6 +116,49 @@ func GeneratePatch(meta Meta) ([]byte, error) {
 
 		j := fmt.Sprintf(add, "initContainers", jaegerInit)
 		patches = append(patches, j)
+	}
+
+	mountsCreated := meta.Sidecar.EnableDatadogTracing || meta.Sidecar.EnableJaegerTracing
+	volumesCreated := len(meta.PodSpec.Volumes) > 0
+	if !volumesCreated && meta.PodSpec.AutomountServiceAccountToken != nil {
+		volumesCreated = *meta.PodSpec.AutomountServiceAccountToken
+	}
+
+	envoyContainerIdx := 0
+	if meta.AppendSidecar {
+		envoyContainerIdx = 1
+	}
+	for _, secretMount := range meta.Sidecar.SecretMounts {
+		// create or add volume mounts to proxy
+		mountPatch, err := renderSecretVolumeMount(secretMount)
+		if err != nil {
+			return emptyPatch, err
+		}
+
+		var secretMountPatch string
+		if !mountsCreated {
+			secretMountPatch = fmt.Sprintf(
+				create, fmt.Sprintf("containers/%d/volumeMounts", envoyContainerIdx), mountPatch)
+			mountsCreated = true
+		} else {
+			secretMountPatch = fmt.Sprintf(
+				add, fmt.Sprintf("containers/%d/volumeMounts", envoyContainerIdx), mountPatch)
+		}
+		patches = append(patches, secretMountPatch)
+
+		// create or add volumes to pod
+		volumePatch, err := renderSecretVolume(secretMount)
+		if err != nil {
+			return emptyPatch, err
+		}
+
+		if !volumesCreated {
+			secretMountPatch = fmt.Sprintf(create, "volumes", volumePatch)
+			volumesCreated = true
+		} else {
+			secretMountPatch = fmt.Sprintf(add, "volumes", volumePatch)
+		}
+		patches = append(patches, secretMountPatch)
 	}
 
 	fmt.Println(patches)

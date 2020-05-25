@@ -43,7 +43,7 @@ The mesh name provided at install time can be overridden with the `appmesh.k8s.a
 
 For example:
 ```yaml
-apiVersion: appsv1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:

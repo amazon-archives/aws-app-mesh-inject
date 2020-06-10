@@ -61,6 +61,9 @@ metadata:
   name: appmesh-inject
   namespace: appmesh-system
 spec:
+  selector:
+    matchLabels:
+      name: appmesh-inject
   template:
     spec:
       containers:

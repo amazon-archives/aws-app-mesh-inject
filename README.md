@@ -49,6 +49,9 @@ metadata:
   labels:
     name: my-cool-deployment
 spec:
+  selector:
+    matchLabels:
+      name: appmesh-inject
   template:
     metadata:
       annotations:

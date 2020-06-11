@@ -43,7 +43,7 @@ spec:
   selector:
     name: appmesh-inject
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: appmesh-inject
@@ -52,6 +52,9 @@ metadata:
     name: appmesh-inject
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: appmesh-inject
   template:
     metadata:
       name: appmesh-inject

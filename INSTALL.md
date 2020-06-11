@@ -55,12 +55,15 @@ patches:
 mymesh.yaml
 ```yaml
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: appmesh-inject
   namespace: appmesh-system
 spec:
+  selector:
+    matchLabels:
+      name: appmesh-inject
   template:
     spec:
       containers:
